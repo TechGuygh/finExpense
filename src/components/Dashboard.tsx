@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { db, auth } from '../firebase';
 import { collection, query, where, onSnapshot, orderBy, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { Transaction, SpendingInsight, UserProfile } from '../types';
+import { Transaction, SpendingInsight, UserProfile, Budget, SavingsGoal, Investment } from '../types';
 import { Card, Button, Input } from './UI';
 import { cn, formatCurrency, exportToCSV, exportToPDF, exportToWord } from '../lib/utils';
 import { getSpendingInsights, forecastExpenses } from '../services/geminiService';
+import { CurrencyConverter } from './CurrencyConverter';
 import { 
   TrendingUp, TrendingDown, DollarSign, Calendar, 
   Trash2, Sparkles, BrainCircuit, ArrowUpRight, ArrowDownRight,
@@ -24,6 +25,9 @@ interface DashboardProps {
 
 export function Dashboard({ profile }: DashboardProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([]);
+  const [investments, setInvestments] = useState<Investment[]>([]);
   const [insights, setInsights] = useState<SpendingInsight[]>([]);
   const [forecast, setForecast] = useState<number>(0);
   const [loadingInsights, setLoadingInsights] = useState(false);
@@ -54,7 +58,27 @@ export function Dashboard({ profile }: DashboardProps) {
       setLoadingTransactions(false);
     });
 
-    return () => unsubscribe();
+    const qBudgets = query(collection(db, 'budgets'), where('userId', '==', auth.currentUser.uid));
+    const unsubBudgets = onSnapshot(qBudgets, (snapshot) => {
+      setBudgets(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Budget)));
+    });
+
+    const qGoals = query(collection(db, 'savingsGoals'), where('userId', '==', auth.currentUser.uid));
+    const unsubGoals = onSnapshot(qGoals, (snapshot) => {
+      setSavingsGoals(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SavingsGoal)));
+    });
+
+    const qInv = query(collection(db, 'investments'), where('userId', '==', auth.currentUser.uid));
+    const unsubInv = onSnapshot(qInv, (snapshot) => {
+      setInvestments(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Investment)));
+    });
+
+    return () => {
+      unsubscribe();
+      unsubBudgets();
+      unsubGoals();
+      unsubInv();
+    };
   }, []);
 
   const categories = useMemo(() => {
@@ -85,7 +109,7 @@ export function Dashboard({ profile }: DashboardProps) {
     setLoadingInsights(true);
     try {
       const [newInsights, newForecast] = await Promise.all([
-        getSpendingInsights(transactions),
+        getSpendingInsights(transactions, budgets, savingsGoals, investments),
         forecastExpenses(transactions)
       ]);
       setInsights(newInsights);
@@ -179,7 +203,7 @@ export function Dashboard({ profile }: DashboardProps) {
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <Card className="bg-indigo-600 text-white border-none shadow-lg shadow-indigo-200">
+          <Card className="bg-gradient-to-br from-[#279d48] to-[#f29111] text-white border-none shadow-lg shadow-orange-200/50">
             <div className="flex items-center justify-between mb-4">
               <div className="p-2 bg-white/20 rounded-lg">
                 <DollarSign className="w-6 h-6" />
@@ -201,7 +225,7 @@ export function Dashboard({ profile }: DashboardProps) {
               </select>
             </div>
             <h2 className="text-3xl font-bold">{formatCurrency(balance, profile?.currency)}</h2>
-            <p className="text-indigo-100 text-sm mt-2">Total net worth tracked</p>
+            <p className="text-white/80 text-sm mt-2">Total net worth tracked</p>
           </Card>
         </motion.div>
 
@@ -298,72 +322,88 @@ export function Dashboard({ profile }: DashboardProps) {
             ))}
           </AnimatePresence>
           {insights.length === 0 && !loadingInsights && (
-            <div className="col-span-full py-8 text-center border-2 border-dashed border-slate-200 rounded-2xl">
-              <p className="text-slate-400 text-sm">Click "Generate Insights" to get AI-powered financial advice.</p>
+            <div className="col-span-full py-12 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+              <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <BrainCircuit className="w-8 h-8" />
+              </div>
+              <h4 className="text-lg font-bold text-slate-900 mb-2">Unlock AI Financial Insights</h4>
+              <p className="text-slate-500 text-sm max-w-md mx-auto mb-6">
+                Let our AI analyze your spending patterns, budget adherence, and savings progress to provide personalized recommendations and identify potential savings.
+              </p>
+              <Button onClick={fetchInsights} disabled={transactions.length === 0} className="gap-2">
+                <Sparkles className="w-4 h-4" />
+                Generate Insights Now
+              </Button>
             </div>
           )}
         </div>
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <BarChartIcon className="w-5 h-5 text-indigo-600" />
-              Spending by Category
-            </h3>
-          </div>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={categoryData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
-                <Tooltip 
-                  cursor={{ fill: '#f8fafc' }}
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  formatter={(value: number) => formatCurrency(value, profile?.currency)}
-                />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                  {categoryData.map((entry: any, index: number) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
+      {/* Charts and Currency Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <BarChartIcon className="w-5 h-5 text-indigo-600" />
+                Spending by Category
+              </h3>
+            </div>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={categoryData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                  <Tooltip 
+                    cursor={{ fill: '#f8fafc' }}
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    formatter={(value: number) => formatCurrency(value, profile?.currency)}
+                  />
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                    {categoryData.map((entry: any, index: number) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
 
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <PieChartIcon className="w-5 h-5 text-indigo-600" />
-              Expense Distribution
-            </h3>
-          </div>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={categoryData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {categoryData.map((entry: any, index: number) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value: number) => formatCurrency(value, profile?.currency)} />
-                <Legend verticalAlign="bottom" height={36}/>
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <PieChartIcon className="w-5 h-5 text-indigo-600" />
+                Expense Distribution
+              </h3>
+            </div>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {categoryData.map((entry: any, index: number) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => formatCurrency(value, profile?.currency)} />
+                  <Legend verticalAlign="bottom" height={36}/>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </div>
+        
+        <div className="lg:col-span-1">
+          <CurrencyConverter defaultCurrency={profile?.currency || 'USD'} />
+        </div>
       </div>
 
       {/* Recent Transactions */}

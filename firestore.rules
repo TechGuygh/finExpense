@@ -15,6 +15,18 @@ service cloud.firestore {
     // Collection: budgets
     // Document ID: budgetId
     // Fields: userId, category, limit, month
+    //
+    // Collection: savingsGoals
+    // Document ID: goalId
+    // Fields: userId, title, targetAmount, currentAmount, deadline, category, createdAt
+    //
+    // Collection: investments
+    // Document ID: investmentId
+    // Fields: userId, name, category, amount, expectedReturnRate, createdAt
+    //
+    // Collection: recurringTransactions
+    // Document ID: recurringId
+    // Fields: userId, amount, type, category, description, frequency, startDate, nextDate, createdAt
     // ===============================================================
 
     // Helper Functions
@@ -45,6 +57,36 @@ service cloud.firestore {
              data.month is string;
     }
 
+    function isValidSavingsGoal(data) {
+      return data.userId == request.auth.uid &&
+             data.title is string && data.title.size() < 100 &&
+             data.targetAmount is number && data.targetAmount > 0 &&
+             data.currentAmount is number && data.currentAmount >= 0 &&
+             data.deadline is string &&
+             data.category is string && data.category.size() < 100 &&
+             data.createdAt is string;
+    }
+
+    function isValidInvestment(data) {
+      return data.userId == request.auth.uid &&
+             data.name is string && data.name.size() < 100 &&
+             data.category is string && data.category.size() < 100 &&
+             data.amount is number && data.amount >= 0 &&
+             data.expectedReturnRate is number &&
+             data.createdAt is string;
+    }
+
+    function isValidRecurring(data) {
+      return data.userId == request.auth.uid &&
+             data.amount is number &&
+             data.type in ['income', 'expense'] &&
+             data.category is string && data.category.size() < 100 &&
+             data.frequency in ['daily', 'weekly', 'monthly', 'yearly'] &&
+             data.startDate is string &&
+             data.nextDate is string &&
+             data.createdAt is string;
+    }
+
     match /users/{userId} {
       allow read, write: if isOwner(userId);
     }
@@ -60,6 +102,27 @@ service cloud.firestore {
       allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
       allow create: if isAuthenticated() && isValidBudget(request.resource.data);
       allow update: if isAuthenticated() && isDocOwner() && isValidBudget(request.resource.data);
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+
+    match /savingsGoals/{goalId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidSavingsGoal(request.resource.data);
+      allow update: if isAuthenticated() && isDocOwner() && isValidSavingsGoal(request.resource.data);
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+
+    match /investments/{investmentId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidInvestment(request.resource.data);
+      allow update: if isAuthenticated() && isDocOwner() && isValidInvestment(request.resource.data);
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+
+    match /recurringTransactions/{recurringId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidRecurring(request.resource.data);
+      allow update: if isAuthenticated() && isDocOwner() && isValidRecurring(request.resource.data);
       allow delete: if isAuthenticated() && isDocOwner();
     }
   }

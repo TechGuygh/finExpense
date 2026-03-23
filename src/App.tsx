@@ -5,25 +5,31 @@ import { Auth } from './components/Auth';
 import { Dashboard } from './components/Dashboard';
 import { TransactionForm } from './components/TransactionForm';
 import { BudgetModule } from './components/BudgetModule';
+import { SavingsInvestments } from './components/SavingsInvestments';
+import { RecurringTransactions } from './components/RecurringTransactions';
+import { AIInvestmentAdvisor } from './components/AIInvestmentAdvisor';
 import { Settings } from './components/Settings';
 import { Button } from './components/UI';
 import { db } from './firebase';
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
-import { UserProfile } from './types';
+import { doc, onSnapshot, setDoc, collection, query, where, getDocs, addDoc, updateDoc } from 'firebase/firestore';
+import { UserProfile, RecurringTransaction } from './types';
 import { 
   LayoutDashboard, 
   PlusCircle, 
   Target, 
   Settings as SettingsIcon, 
-  Wallet,
   Menu,
   X,
   Sparkles,
-  LogOut
+  LogOut,
+  PiggyBank,
+  Repeat,
+  BrainCircuit
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Logo } from './components/Logo';
 
-type Tab = 'dashboard' | 'add' | 'budgets' | 'settings';
+type Tab = 'dashboard' | 'add' | 'budgets' | 'savings' | 'recurring' | 'advisor' | 'settings';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -67,12 +73,65 @@ export default function App() {
     return () => unsubscribeProfile();
   }, [user]);
 
+  useEffect(() => {
+    if (!user || !isAuthReady) return;
+
+    const processRecurring = async () => {
+      try {
+        const q = query(collection(db, 'recurringTransactions'), where('userId', '==', user.uid));
+        const snapshot = await getDocs(q);
+        const today = new Date();
+        
+        for (const docSnap of snapshot.docs) {
+          const rt = { id: docSnap.id, ...docSnap.data() } as RecurringTransaction;
+          let nextDate = new Date(rt.nextDate);
+          
+          let updated = false;
+          while (nextDate <= today) {
+            // Create transaction
+            await addDoc(collection(db, 'transactions'), {
+              userId: user.uid,
+              amount: rt.amount,
+              type: rt.type,
+              category: rt.category,
+              description: rt.description,
+              date: nextDate.toISOString(),
+              isAiCategorized: false
+            });
+
+            // Calculate next date
+            if (rt.frequency === 'daily') {
+              nextDate.setDate(nextDate.getDate() + 1);
+            } else if (rt.frequency === 'weekly') {
+              nextDate.setDate(nextDate.getDate() + 7);
+            } else if (rt.frequency === 'monthly') {
+              nextDate.setMonth(nextDate.getMonth() + 1);
+            } else if (rt.frequency === 'yearly') {
+              nextDate.setFullYear(nextDate.getFullYear() + 1);
+            }
+            updated = true;
+          }
+
+          if (updated) {
+            await updateDoc(doc(db, 'recurringTransactions', rt.id), {
+              nextDate: nextDate.toISOString()
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error processing recurring transactions:", error);
+      }
+    };
+
+    processRecurring();
+  }, [user, isAuthReady]);
+
   if (!isAuthReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-500 font-medium animate-pulse">Initializing FinAI...</p>
+          <p className="text-slate-500 font-medium animate-pulse">Initializing SUSU...</p>
         </div>
       </div>
     );
@@ -85,7 +144,10 @@ export default function App() {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'add', label: 'Add Transaction', icon: PlusCircle },
+    { id: 'recurring', label: 'Recurring', icon: Repeat },
     { id: 'budgets', label: 'Budgets', icon: Target },
+    { id: 'savings', label: 'Savings & Invest', icon: PiggyBank },
+    { id: 'advisor', label: 'AI Advisor', icon: BrainCircuit },
     { id: 'settings', label: 'Settings', icon: SettingsIcon },
   ];
 
@@ -94,10 +156,10 @@ export default function App() {
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex w-72 bg-white border-r border-slate-200 flex-col p-6 sticky top-0 h-screen">
         <div className="flex items-center gap-3 mb-10 px-2">
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100">
-            <Wallet className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-slate-100 border border-slate-100">
+            <Logo className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">FinAI</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">SUSU</h1>
         </div>
 
         <nav className="flex-1 space-y-2">
@@ -107,22 +169,22 @@ export default function App() {
               onClick={() => setActiveTab(item.id as Tab)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${
                 activeTab === item.id
-                  ? 'bg-indigo-50 text-indigo-600 shadow-sm'
+                  ? 'bg-emerald-50 text-[#279d48] shadow-sm'
                   : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
-              <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-indigo-600' : 'text-slate-400'}`} />
+              <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-[#279d48]' : 'text-slate-400'}`} />
               {item.label}
             </button>
           ))}
         </nav>
 
         <div className="mt-auto pt-6 border-t border-slate-100 flex flex-col gap-6">
-          <div className="bg-indigo-600 rounded-2xl p-4 text-white relative overflow-hidden">
+          <div className="bg-[#279d48] rounded-2xl p-4 text-white relative overflow-hidden">
             <Sparkles className="absolute -right-2 -top-2 w-16 h-16 text-white/10 rotate-12" />
-            <h4 className="text-sm font-bold mb-1">FinAI Premium</h4>
-            <p className="text-[10px] text-indigo-100 mb-3">Unlock advanced AI forecasting and multi-currency support.</p>
-            <Button size="sm" className="w-full bg-white text-indigo-600 hover:bg-indigo-50 border-none">
+            <h4 className="text-sm font-bold mb-1">SUSU Premium</h4>
+            <p className="text-[10px] text-white/80 mb-3">Unlock advanced AI forecasting and multi-currency support.</p>
+            <Button size="sm" className="w-full bg-white text-[#279d48] hover:bg-emerald-50 border-none">
               Upgrade Now
             </Button>
           </div>
@@ -152,10 +214,10 @@ export default function App() {
       {/* Mobile Header */}
       <header className="lg:hidden bg-white border-b border-slate-200 p-4 sticky top-0 z-50 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <Wallet className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-slate-100">
+            <Logo className="w-5 h-5" />
           </div>
-          <h1 className="text-xl font-bold text-slate-900">FinAI</h1>
+          <h1 className="text-xl font-bold text-slate-900">SUSU</h1>
         </div>
         <div className="flex items-center gap-3">
           <img 
@@ -192,7 +254,7 @@ export default function App() {
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${
                     activeTab === item.id
-                      ? 'bg-indigo-50 text-indigo-600'
+                      ? 'bg-emerald-50 text-[#279d48]'
                       : 'text-slate-500 hover:bg-slate-50'
                   }`}
                 >
@@ -221,12 +283,18 @@ export default function App() {
             <h2 className="text-3xl font-bold text-slate-900">
               {activeTab === 'dashboard' ? 'Financial Overview' : 
                activeTab === 'add' ? 'New Transaction' : 
-               activeTab === 'budgets' ? 'Budget Planning' : 'Settings'}
+               activeTab === 'recurring' ? 'Recurring Transactions' : 
+               activeTab === 'budgets' ? 'Budget Planning' : 
+               activeTab === 'savings' ? 'Savings & Investments' : 
+               activeTab === 'advisor' ? 'AI Investment Advisor' : 'Settings'}
             </h2>
             <p className="text-slate-500 mt-1">
               {activeTab === 'dashboard' ? 'Track your spending and get AI insights.' : 
                activeTab === 'add' ? 'Add a new income or expense record.' : 
-               activeTab === 'budgets' ? 'Set monthly limits for your categories.' : 'Manage your profile and preferences.'}
+               activeTab === 'recurring' ? 'Manage subscriptions and regular income.' : 
+               activeTab === 'budgets' ? 'Set monthly limits for your categories.' : 
+               activeTab === 'savings' ? 'Set goals and track your portfolio.' : 
+               activeTab === 'advisor' ? 'Get personalized investment recommendations.' : 'Manage your profile and preferences.'}
             </p>
           </div>
         </div>
@@ -245,7 +313,10 @@ export default function App() {
                 <TransactionForm />
               </div>
             )}
+            {activeTab === 'recurring' && <RecurringTransactions profile={profile} />}
             {activeTab === 'budgets' && <BudgetModule profile={profile} />}
+            {activeTab === 'savings' && <SavingsInvestments profile={profile} />}
+            {activeTab === 'advisor' && <AIInvestmentAdvisor profile={profile} />}
             {activeTab === 'settings' && <Settings />}
           </motion.div>
         </AnimatePresence>

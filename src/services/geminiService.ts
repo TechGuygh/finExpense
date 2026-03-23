@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { Transaction, SpendingInsight } from "../types";
+import { Transaction, SpendingInsight, Budget, SavingsGoal, Investment, AIInvestmentPlan } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
@@ -19,7 +19,12 @@ export async function categorizeTransaction(description: string, amount: number)
   }
 }
 
-export async function getSpendingInsights(transactions: Transaction[]): Promise<SpendingInsight[]> {
+export async function getSpendingInsights(
+  transactions: Transaction[],
+  budgets?: Budget[],
+  savingsGoals?: SavingsGoal[],
+  investments?: Investment[]
+): Promise<SpendingInsight[]> {
   try {
     const transactionSummary = transactions.map(t => ({
       amount: t.amount,
@@ -29,9 +34,18 @@ export async function getSpendingInsights(transactions: Transaction[]): Promise<
       date: t.date
     }));
 
+    const contextData = {
+      transactions: transactionSummary,
+      budgets: budgets || [],
+      savingsGoals: savingsGoals || [],
+      investments: investments || []
+    };
+
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `Analyze these transactions and provide 3 smart financial insights or recommendations: ${JSON.stringify(transactionSummary)}. 
+      contents: `Analyze this financial data and provide 3 highly personalized, actionable financial insights or recommendations. 
+      Consider spending habits, budget adherence, savings goals progress, and potential duplicate transactions or unusual spending spikes.
+      Data: ${JSON.stringify(contextData)}. 
       Return the response as a JSON array of objects with 'title', 'content', and 'type' (one of: 'info', 'warning', 'success').`,
       config: {
         responseMimeType: "application/json",
@@ -110,6 +124,89 @@ export async function extractReceiptDetails(base64Image: string, mimeType: strin
     return JSON.parse(response.text || "null");
   } catch (error) {
     console.error("Receipt extraction failed:", error);
+    return null;
+  }
+}
+
+export async function getInvestmentAdvice(
+  transactions: Transaction[],
+  savingsGoals: SavingsGoal[],
+  investments: Investment[],
+  riskTolerance: string,
+  investmentHorizon: string
+): Promise<AIInvestmentPlan | null> {
+  try {
+    const contextData = {
+      transactions: transactions.map(t => ({ amount: t.amount, type: t.type, category: t.category })),
+      savingsGoals: savingsGoals.map(g => ({ title: g.title, target: g.targetAmount, current: g.currentAmount, deadline: g.deadline })),
+      investments: investments.map(i => ({ name: i.name, amount: i.amount, category: i.category, expectedReturn: i.expectedReturnRate })),
+      riskTolerance,
+      investmentHorizon
+    };
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.1-pro-preview",
+      contents: `You are an expert, unbiased financial AI advisor. Analyze the user's financial data to provide a personalized investment plan.
+      
+      User Data: ${JSON.stringify(contextData)}
+      
+      Provide:
+      1. A brief summary of their current financial standing.
+      2. Their assessed risk profile based on their input and data.
+      3. A recommended asset allocation (e.g., Stocks, Bonds, Crypto, Real Estate) with percentages totaling 100%. Explain the reasoning for each, keeping it simple and free of complex jargon.
+      4. 3 actionable AI tips for investing, holding, or diversifying.
+      5. A behavioral nudge to encourage better financial habits.
+      6. 3 "What-if" scenario simulations showing potential future values based on different market conditions or contribution levels over their investment horizon.
+      
+      Ensure recommendations are ethical, unbiased, and transparent. Do not give guaranteed financial advice.
+      Return the response strictly as JSON matching the schema.`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            riskProfile: { type: Type.STRING },
+            summary: { type: Type.STRING },
+            recommendations: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  assetClass: { type: Type.STRING },
+                  allocationPercentage: { type: Type.NUMBER },
+                  reasoning: { type: Type.STRING },
+                  riskLevel: { type: Type.STRING, enum: ['low', 'medium', 'high'] },
+                  expectedReturn: { type: Type.NUMBER }
+                },
+                required: ["assetClass", "allocationPercentage", "reasoning", "riskLevel", "expectedReturn"]
+              }
+            },
+            tips: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING }
+            },
+            behavioralNudge: { type: Type.STRING },
+            scenarios: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  scenarioName: { type: Type.STRING },
+                  projectedValue: { type: Type.NUMBER },
+                  description: { type: Type.STRING }
+                },
+                required: ["scenarioName", "projectedValue", "description"]
+              }
+            }
+          },
+          required: ["riskProfile", "summary", "recommendations", "tips", "behavioralNudge", "scenarios"]
+        }
+      }
+    });
+
+    return JSON.parse(response.text || "null");
+  } catch (error) {
+    console.error("AI Investment Advice failed:", error);
     return null;
   }
 }

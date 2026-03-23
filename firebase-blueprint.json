@@ -40,6 +40,55 @@
         "month": { "type": "string", "description": "The month and year (e.g., 2023-10)." }
       },
       "required": ["userId", "category", "limit", "month"]
+    },
+    "SavingsGoal": {
+      "title": "Savings Goal",
+      "description": "User's financial savings goals.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique goal ID." },
+        "userId": { "type": "string", "description": "The ID of the user." },
+        "title": { "type": "string", "description": "Title of the goal." },
+        "targetAmount": { "type": "number", "description": "Target amount to save." },
+        "currentAmount": { "type": "number", "description": "Current amount saved." },
+        "deadline": { "type": "string", "format": "date-time", "description": "Deadline for the goal." },
+        "category": { "type": "string", "description": "Category of the goal." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the goal was created." }
+      },
+      "required": ["userId", "title", "targetAmount", "currentAmount", "deadline", "category", "createdAt"]
+    },
+    "Investment": {
+      "title": "Investment",
+      "description": "User's investments.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique investment ID." },
+        "userId": { "type": "string", "description": "The ID of the user." },
+        "name": { "type": "string", "description": "Name of the investment." },
+        "category": { "type": "string", "description": "Category of the investment." },
+        "amount": { "type": "number", "description": "Amount invested." },
+        "expectedReturnRate": { "type": "number", "description": "Expected return rate in percentage." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the investment was created." }
+      },
+      "required": ["userId", "name", "category", "amount", "expectedReturnRate", "createdAt"]
+    },
+    "RecurringTransaction": {
+      "title": "Recurring Transaction",
+      "description": "A transaction that repeats on a schedule.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique recurring transaction ID." },
+        "userId": { "type": "string", "description": "The ID of the user." },
+        "amount": { "type": "number", "description": "The amount." },
+        "type": { "type": "string", "enum": ["income", "expense"], "description": "Whether it's income or expense." },
+        "category": { "type": "string", "description": "The category." },
+        "description": { "type": "string", "description": "A brief description." },
+        "frequency": { "type": "string", "enum": ["daily", "weekly", "monthly", "yearly"], "description": "How often it repeats." },
+        "startDate": { "type": "string", "format": "date-time", "description": "When it started." },
+        "nextDate": { "type": "string", "format": "date-time", "description": "The next date it should be processed." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the record was created." }
+      },
+      "required": ["userId", "amount", "type", "category", "frequency", "startDate", "nextDate", "createdAt"]
     }
   },
   "firestore": {
@@ -54,6 +103,18 @@
     "/budgets/{budgetId}": {
       "schema": "Budget",
       "description": "Budget limit records."
+    },
+    "/savingsGoals/{goalId}": {
+      "schema": "SavingsGoal",
+      "description": "Savings goal records."
+    },
+    "/investments/{investmentId}": {
+      "schema": "Investment",
+      "description": "Investment records."
+    },
+    "/recurringTransactions/{recurringId}": {
+      "schema": "RecurringTransaction",
+      "description": "Recurring transaction records."
     }
   }
 }

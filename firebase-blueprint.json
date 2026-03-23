@@ -1,0 +1,59 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user-specific settings and metadata.",
+      "type": "object", 
+      "properties": {
+        "uid": { "type": "string", "description": "The unique identifier for the user." },
+        "displayName": { "type": "string", "description": "The user's display name." },
+        "email": { "type": "string", "format": "email", "description": "The user's email address." },
+        "currency": { "type": "string", "description": "The user's preferred currency (e.g., USD, EUR)." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the profile was created." }
+      },
+      "required": ["uid", "email"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Represents an income or expense record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique transaction ID." },
+        "userId": { "type": "string", "description": "The ID of the user who owns this transaction." },
+        "amount": { "type": "number", "description": "The amount of the transaction." },
+        "type": { "type": "string", "enum": ["income", "expense"], "description": "Whether it's income or expense." },
+        "category": { "type": "string", "description": "The category (e.g., Food, Rent, Salary)." },
+        "description": { "type": "string", "description": "A brief description of the transaction." },
+        "date": { "type": "string", "format": "date-time", "description": "The date of the transaction." },
+        "isAiCategorized": { "type": "boolean", "description": "Whether AI was used to categorize this." }
+      },
+      "required": ["userId", "amount", "type", "category", "date"]
+    },
+    "Budget": {
+      "title": "Budget",
+      "description": "Monthly budget limits for specific categories.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The ID of the user." },
+        "category": { "type": "string", "description": "The category this budget applies to." },
+        "limit": { "type": "number", "description": "The monthly spending limit." },
+        "month": { "type": "string", "description": "The month and year (e.g., 2023-10)." }
+      },
+      "required": ["userId", "category", "limit", "month"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile documents."
+    },
+    "/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Transaction records."
+    },
+    "/budgets/{budgetId}": {
+      "schema": "Budget",
+      "description": "Budget limit records."
+    }
+  }
+}

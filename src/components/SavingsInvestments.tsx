@@ -189,11 +189,7 @@ export function SavingsInvestments({ profile }: Props) {
   return (
     <div className="space-y-8">
       {/* Header & Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Savings & Investments</h2>
-          <p className="text-slate-500">Grow your wealth and track your financial goals</p>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-4">
         <div className="flex bg-slate-200 p-1 rounded-xl">
           <button
             onClick={() => setActiveTab('savings')}
@@ -267,9 +263,18 @@ export function SavingsInvestments({ profile }: Props) {
           {/* Goals List */}
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-slate-900">Your Goals</h3>
-            <Button onClick={() => setShowAddGoal(true)} size="sm" className="bg-[#279d48] hover:bg-emerald-600">
-              <PlusCircle className="w-4 h-4 mr-2" />
-              New Goal
+            <Button 
+              onClick={() => setShowAddGoal(!showAddGoal)} 
+              size="sm" 
+              variant={showAddGoal ? "outline" : "primary"}
+              className={!showAddGoal ? "bg-[#279d48] hover:bg-emerald-600" : ""}
+            >
+              {showAddGoal ? "Cancel" : (
+                <>
+                  <PlusCircle className="w-4 h-4 mr-2" />
+                  New Goal
+                </>
+              )}
             </Button>
           </div>
 
@@ -439,9 +444,18 @@ export function SavingsInvestments({ profile }: Props) {
           {/* Investments List */}
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-slate-900">Your Portfolio</h3>
-            <Button onClick={() => setShowAddInvestment(true)} size="sm" className="bg-[#f29111] hover:bg-orange-600 text-white border-none">
-              <PlusCircle className="w-4 h-4 mr-2" />
-              Add Asset
+            <Button 
+              onClick={() => setShowAddInvestment(!showAddInvestment)} 
+              size="sm" 
+              variant={showAddInvestment ? "outline" : "primary"}
+              className={!showAddInvestment ? "bg-[#f29111] hover:bg-orange-600 text-white border-none" : ""}
+            >
+              {showAddInvestment ? "Cancel" : (
+                <>
+                  <PlusCircle className="w-4 h-4 mr-2" />
+                  Add Asset
+                </>
+              )}
             </Button>
           </div>
 

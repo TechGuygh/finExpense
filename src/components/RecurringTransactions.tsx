@@ -77,14 +77,18 @@ export function RecurringTransactions({ profile }: Props) {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Recurring Transactions</h2>
-          <p className="text-slate-500">Manage subscriptions, salary, and regular bills</p>
-        </div>
-        <Button onClick={() => setShowAdd(!showAdd)} className="bg-indigo-600 hover:bg-indigo-700">
-          <PlusCircle className="w-4 h-4 mr-2" />
-          Add Recurring
+      <div className="flex items-center justify-end">
+        <Button 
+          onClick={() => setShowAdd(!showAdd)} 
+          variant={showAdd ? "outline" : "primary"}
+          className={!showAdd ? "bg-indigo-600 hover:bg-indigo-700" : ""}
+        >
+          {showAdd ? "Cancel" : (
+            <>
+              <PlusCircle className="w-4 h-4 mr-2" />
+              Add Recurring
+            </>
+          )}
         </Button>
       </div>
 

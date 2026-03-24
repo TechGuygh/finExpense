@@ -53,16 +53,6 @@ export function AIInvestmentAdvisor({ profile }: AIInvestmentAdvisorProps) {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <BrainCircuit className="w-6 h-6 text-indigo-600" />
-            AI Investment Advisor
-          </h2>
-          <p className="text-slate-500">Personalized, data-driven investment strategies</p>
-        </div>
-      </div>
-
       <Card className="bg-white border-slate-200">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
           <div>

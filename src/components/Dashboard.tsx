@@ -42,6 +42,7 @@ export function Dashboard({ profile }: DashboardProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Transaction>>({});
   const [loadingTransactions, setLoadingTransactions] = useState(true);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!auth.currentUser) return;
@@ -145,9 +146,15 @@ export function Dashboard({ profile }: DashboardProps) {
 
   const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirmId) return;
     try {
-      await deleteDoc(doc(db, 'transactions', id));
+      await deleteDoc(doc(db, 'transactions', deleteConfirmId));
+      setDeleteConfirmId(null);
     } catch (error) {
       console.error("Delete failed:", error);
     }
@@ -611,6 +618,33 @@ export function Dashboard({ profile }: DashboardProps) {
           </table>
         </div>
       </Card>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {deleteConfirmId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6"
+            >
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Delete Transaction</h3>
+              <p className="text-slate-500 text-sm mb-6">
+                Are you sure you want to delete this transaction? This action cannot be undone.
+              </p>
+              <div className="flex items-center justify-end gap-3">
+                <Button variant="ghost" onClick={() => setDeleteConfirmId(null)}>
+                  Cancel
+                </Button>
+                <Button variant="danger" onClick={confirmDelete} className="bg-rose-600 hover:bg-rose-700 text-white">
+                  Delete
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

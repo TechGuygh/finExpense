@@ -17,6 +17,8 @@ export interface Budget {
   category: string;
   limit: number;
   month: string;
+  rollover?: boolean;
+  type?: 'income' | 'expense';
 }
 
 export interface UserProfile {

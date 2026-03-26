@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { auth, db } from '../firebase';
 import { collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { SavingsGoal, Investment, UserProfile } from '../types';
 import { Card, Button, Input, Select } from './UI';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
+import { GoogleGenAI } from '@google/genai';
 import { 
   Target, 
   TrendingUp, 
@@ -13,7 +15,10 @@ import {
   ArrowUpRight, 
   Trash2,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  Sparkles,
+  Bell,
+  RefreshCw
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -24,8 +29,12 @@ import {
   Tooltip, 
   ResponsiveContainer,
   LineChart,
-  Line
+  Line,
+  AreaChart,
+  Area
 } from 'recharts';
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 interface Props {
   profile: UserProfile | null;
@@ -47,6 +56,10 @@ export function SavingsInvestments({ profile }: Props) {
   const [goalTarget, setGoalTarget] = useState('');
   const [goalDeadline, setGoalDeadline] = useState('');
   const [goalCategory, setGoalCategory] = useState('Emergency Fund');
+  const [goalAutoContribute, setGoalAutoContribute] = useState(false);
+  const [goalAutoAmount, setGoalAutoAmount] = useState('');
+  const [goalAutoFreq, setGoalAutoFreq] = useState<'weekly' | 'monthly'>('monthly');
+  const [goalReminders, setGoalReminders] = useState(true);
   
   // Contribution State
   const [contributeGoalId, setContributeGoalId] = useState<string | null>(null);
@@ -57,6 +70,11 @@ export function SavingsInvestments({ profile }: Props) {
   const [invAmount, setInvAmount] = useState('');
   const [invCategory, setInvCategory] = useState('Stocks');
   const [invReturn, setInvReturn] = useState('');
+
+  // AI Tip State
+  const [aiTip, setAiTip] = useState<string>('');
+  const [loadingTip, setLoadingTip] = useState(false);
+  const notifiedGoals = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (!auth.currentUser) return;
@@ -81,6 +99,49 @@ export function SavingsInvestments({ profile }: Props) {
     };
   }, []);
 
+  useEffect(() => {
+    if (goals.length === 0) return;
+    
+    const now = new Date();
+    goals.forEach(goal => {
+      if (goal.remindersEnabled && goal.deadline && !notifiedGoals.current.has(goal.id)) {
+        const deadline = new Date(goal.deadline);
+        const daysLeft = (deadline.getTime() - now.getTime()) / (1000 * 3600 * 24);
+        
+        // If deadline is within 30 days and goal is not met
+        if (daysLeft > 0 && daysLeft <= 30 && goal.currentAmount < goal.targetAmount) {
+          toast.warning(`Reminder: Your goal "${goal.title}" is due in ${Math.ceil(daysLeft)} days! Keep contributing to stay on track.`, {
+            duration: 8000,
+            icon: '🎯'
+          });
+          notifiedGoals.current.add(goal.id);
+        }
+      }
+    });
+  }, [goals]);
+
+  useEffect(() => {
+    if (activeTab === 'investments' && !aiTip && !loadingTip) {
+      fetchAiTip();
+    }
+  }, [activeTab]);
+
+  const fetchAiTip = async () => {
+    setLoadingTip(true);
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: "Provide a short, 2-sentence general investment tip or best practice for a retail investor. Keep it encouraging and easy to understand. Do not use markdown."
+      });
+      setAiTip(response.text || "Diversify your portfolio across different asset classes to reduce risk. Consistency is key to long-term wealth building.");
+    } catch (error) {
+      console.error("Failed to fetch AI tip", error);
+      setAiTip("Diversify your portfolio across different asset classes to reduce risk. Consistency is key to long-term wealth building.");
+    } finally {
+      setLoadingTip(false);
+    }
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -93,21 +154,36 @@ export function SavingsInvestments({ profile }: Props) {
     if (!auth.currentUser) return;
     
     try {
-      await addDoc(collection(db, 'savingsGoals'), {
+      const newGoal: any = {
         userId: auth.currentUser.uid,
         title: goalTitle,
         targetAmount: Number(goalTarget),
         currentAmount: 0,
         deadline: goalDeadline,
         category: goalCategory,
-        createdAt: new Date().toISOString()
-      });
+        createdAt: new Date().toISOString(),
+        remindersEnabled: goalReminders
+      };
+
+      if (goalAutoContribute && Number(goalAutoAmount) > 0) {
+        newGoal.autoContribute = {
+          amount: Number(goalAutoAmount),
+          frequency: goalAutoFreq
+        };
+      }
+
+      await addDoc(collection(db, 'savingsGoals'), newGoal);
       setShowAddGoal(false);
       setGoalTitle('');
       setGoalTarget('');
       setGoalDeadline('');
+      setGoalAutoContribute(false);
+      setGoalAutoAmount('');
+      setGoalReminders(true);
+      toast.success("Savings goal created successfully!");
     } catch (error) {
       console.error("Error adding goal:", error);
+      toast.error("Failed to create savings goal.");
     }
   };
 
@@ -307,7 +383,54 @@ export function SavingsInvestments({ profile }: Props) {
                     <Input required type="date" value={goalDeadline} onChange={e => setGoalDeadline(e.target.value)} />
                   </div>
                 </div>
-                <div className="flex justify-end gap-2 pt-2">
+
+                <div className="border-t border-slate-100 pt-4 mt-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <RefreshCw className="w-4 h-4 text-emerald-600" />
+                        Auto-Contribute
+                      </h5>
+                      <p className="text-xs text-slate-500">Set up recurring contributions to reach your goal faster.</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" checked={goalAutoContribute} onChange={e => setGoalAutoContribute(e.target.checked)} />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
+                  </div>
+
+                  {goalAutoContribute && (
+                    <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Amount</label>
+                        <Input type="number" min="1" step="0.01" value={goalAutoAmount} onChange={e => setGoalAutoAmount(e.target.value)} placeholder="100" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Frequency</label>
+                        <Select value={goalAutoFreq} onChange={e => setGoalAutoFreq(e.target.value as 'weekly' | 'monthly')}>
+                          <option value="weekly">Weekly</option>
+                          <option value="monthly">Monthly</option>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-2">
+                    <div>
+                      <h5 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <Bell className="w-4 h-4 text-amber-500" />
+                        Goal Reminders
+                      </h5>
+                      <p className="text-xs text-slate-500">Get notified when you're falling behind schedule.</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" checked={goalReminders} onChange={e => setGoalReminders(e.target.checked)} />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
                   <Button type="button" variant="outline" onClick={() => setShowAddGoal(false)}>Cancel</Button>
                   <Button type="submit" className="bg-[#279d48] hover:bg-emerald-600">Save Goal</Button>
                 </div>
@@ -424,19 +547,54 @@ export function SavingsInvestments({ profile }: Props) {
             </Card>
 
             <Card className="md:col-span-2">
-              <h3 className="font-bold text-slate-900 mb-4">5-Year Projection</h3>
+              <h3 className="font-bold text-slate-900 mb-4">5-Year Growth Projection</h3>
               <div className="h-[120px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={projectionData}>
+                  <AreaChart data={projectionData}>
+                    <defs>
+                      <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f29111" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#f29111" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                     <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
                     <Tooltip 
-                      formatter={(value: number) => formatCurrency(value)}
+                      formatter={(value: number) => [formatCurrency(value), 'Projected Value']}
                       contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                     />
-                    <Line type="monotone" dataKey="value" stroke="#f29111" strokeWidth={3} dot={{ r: 4, fill: '#f29111' }} />
-                  </LineChart>
+                    <Area 
+                      type="monotone" 
+                      dataKey="value" 
+                      stroke="#f29111" 
+                      strokeWidth={3} 
+                      fillOpacity={1} 
+                      fill="url(#colorValue)" 
+                      isAnimationActive={true}
+                    />
+                  </AreaChart>
                 </ResponsiveContainer>
+              </div>
+            </Card>
+
+            <Card className="md:col-span-3 bg-indigo-50 border-indigo-100">
+              <div className="flex items-start gap-3">
+                <Sparkles className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-medium text-indigo-900 mb-1">AI Investment Insight</h3>
+                  {loadingTip ? (
+                    <div className="animate-pulse flex space-x-4 mt-2">
+                      <div className="flex-1 space-y-2 py-1">
+                        <div className="h-2 bg-indigo-200 rounded w-3/4"></div>
+                        <div className="h-2 bg-indigo-200 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-indigo-700 leading-relaxed">
+                      {aiTip}
+                    </p>
+                  )}
+                </div>
               </div>
             </Card>
           </div>

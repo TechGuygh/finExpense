@@ -44,6 +44,7 @@ export default function App() {
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -195,9 +196,9 @@ export default function App() {
           {/* User Profile - Top */}
           <div className="flex items-center gap-3 px-4 py-3 mb-6 bg-slate-50 rounded-xl border border-slate-100 shrink-0">
             <img 
-              src={user.photoURL || `https://ui-avatars.com/api/?name=${profile?.displayName || user.displayName || 'Guest'}`} 
+              src={profile?.photoURL || user.photoURL || `https://ui-avatars.com/api/?name=${profile?.displayName || user.displayName || 'Guest'}`} 
               alt="Profile" 
-              className="w-10 h-10 rounded-full border-2 border-white shadow-sm"
+              className="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover"
               referrerPolicy="no-referrer"
             />
             <div className="flex-1 min-w-0">
@@ -205,7 +206,7 @@ export default function App() {
               <p className="text-xs text-slate-500 truncate">{profile?.email || user.email || 'Anonymous'}</p>
             </div>
             <button 
-              onClick={() => signOut(auth)}
+              onClick={() => setShowLogoutConfirm(true)}
               className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
               title="Logout"
             >
@@ -261,9 +262,9 @@ export default function App() {
         </div>
         <div className="flex items-center gap-3">
           <img 
-            src={user.photoURL || `https://ui-avatars.com/api/?name=${profile?.displayName || user.displayName || 'Guest'}`} 
+            src={profile?.photoURL || user.photoURL || `https://ui-avatars.com/api/?name=${profile?.displayName || user.displayName || 'Guest'}`} 
             alt="Profile" 
-            className="w-8 h-8 rounded-full border border-slate-200"
+            className="w-8 h-8 rounded-full border border-slate-200 object-cover"
             referrerPolicy="no-referrer"
           />
           <button 
@@ -289,9 +290,9 @@ export default function App() {
               <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 mb-6">
                 <div className="flex items-center gap-3 min-w-0">
                   <img 
-                    src={user.photoURL || `https://ui-avatars.com/api/?name=${profile?.displayName || user.displayName || 'Guest'}`} 
+                    src={profile?.photoURL || user.photoURL || `https://ui-avatars.com/api/?name=${profile?.displayName || user.displayName || 'Guest'}`} 
                     alt="Profile" 
-                    className="w-10 h-10 rounded-full border-2 border-white shadow-sm shrink-0"
+                    className="w-10 h-10 rounded-full border-2 border-white shadow-sm shrink-0 object-cover"
                     referrerPolicy="no-referrer"
                   />
                   <div className="min-w-0">
@@ -300,7 +301,7 @@ export default function App() {
                   </div>
                 </div>
                 <button 
-                  onClick={() => signOut(auth)}
+                  onClick={() => setShowLogoutConfirm(true)}
                   className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors shrink-0"
                   title="Logout"
                 >
@@ -384,7 +385,7 @@ export default function App() {
             {activeTab === 'savings' && <SavingsInvestments profile={profile} />}
             {activeTab === 'market' && <MarketInsights profile={profile} />}
             {activeTab === 'advisor' && <AIInvestmentAdvisor profile={profile} />}
-            {activeTab === 'settings' && <Settings />}
+            {activeTab === 'settings' && <Settings onSave={() => setActiveTab('dashboard')} />}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -392,6 +393,46 @@ export default function App() {
       {/* Global Smart AI Assistant */}
       <SmartAIAssistant profile={profile} />
       
+      {/* Logout Confirmation Modal */}
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
+            >
+              <div className="p-6 text-center">
+                <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <LogOut className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Log Out</h3>
+                <p className="text-slate-500 mb-6">Are you sure you want to log out of your account?</p>
+                <div className="flex gap-3">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => setShowLogoutConfirm(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    className="flex-1 bg-rose-600 hover:bg-rose-700 text-white border-none"
+                    onClick={() => {
+                      setShowLogoutConfirm(false);
+                      signOut(auth);
+                    }}
+                  >
+                    Log Out
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <Toaster position="top-center" richColors />
     </div>
   );

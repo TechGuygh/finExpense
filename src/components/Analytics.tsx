@@ -128,7 +128,7 @@ export function Analytics({ profile }: AnalyticsProps) {
       {/* Key Insights Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <Card className="bg-gradient-to-br from-emerald-400 to-emerald-600 text-white border-none shadow-lg shadow-emerald-500/20 relative overflow-hidden">
+          <Card className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white border-none shadow-lg shadow-emerald-200/50 relative overflow-hidden">
             <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-xl" />
             <h3 className="text-emerald-50 font-medium text-sm mb-1">Total Income</h3>
             <p className="text-3xl font-bold tracking-tight">{formatCurrency(income, profile?.currency)}</p>
@@ -139,7 +139,7 @@ export function Analytics({ profile }: AnalyticsProps) {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <Card className="bg-gradient-to-br from-rose-400 to-rose-600 text-white border-none shadow-lg shadow-rose-500/20 relative overflow-hidden">
+          <Card className="bg-gradient-to-br from-rose-500 to-orange-500 text-white border-none shadow-lg shadow-rose-200/50 relative overflow-hidden">
             <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-xl" />
             <h3 className="text-rose-50 font-medium text-sm mb-1">Total Expenses</h3>
             <p className="text-3xl font-bold tracking-tight">{formatCurrency(expense, profile?.currency)}</p>

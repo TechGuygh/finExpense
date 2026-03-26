@@ -12,11 +12,15 @@ export function TransactionForm() {
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [type, setType] = useState<TransactionType>('expense');
+  const [category, setCategory] = useState<string>(''); // Empty means AI will categorize
   const [loading, setLoading] = useState(false);
   const [isAiCategorizing, setIsAiCategorizing] = useState(false);
   const [receiptLoading, setReceiptLoading] = useState(false);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const expenseCategories = ['Food & Dining', 'Transportation', 'Housing', 'Utilities', 'Entertainment', 'Healthcare', 'Shopping', 'Other'];
+  const incomeCategories = ['Salary', 'Business', 'Investments', 'Gifts', 'Other'];
 
   const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,7 +65,7 @@ export function TransactionForm() {
     setIsAiCategorizing(true);
 
     try {
-      const category = await categorizeTransaction(description, parseFloat(amount));
+      const finalCategory = category || await categorizeTransaction(description, parseFloat(amount));
       
       const transactionDate = new Date(date);
       transactionDate.setHours(new Date().getHours(), new Date().getMinutes());
@@ -70,10 +74,10 @@ export function TransactionForm() {
         userId: auth.currentUser.uid,
         amount: parseFloat(amount),
         type,
-        category,
+        category: finalCategory,
         description,
         date: transactionDate.toISOString(),
-        isAiCategorized: true,
+        isAiCategorized: !category,
         createdAt: serverTimestamp()
       });
 
@@ -81,6 +85,7 @@ export function TransactionForm() {
       setDescription('');
       setDate(new Date().toISOString().split('T')[0]);
       setType('expense');
+      setCategory('');
       setReceiptPreview(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (error) {
@@ -214,6 +219,19 @@ export function TransactionForm() {
               required
             />
           </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Category (Optional)</label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full h-11 px-4 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+            >
+              <option value="">✨ Let AI categorize automatically</option>
+              {(type === 'expense' ? expenseCategories : incomeCategories).map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <Button 
@@ -231,7 +249,7 @@ export function TransactionForm() {
                 className="flex items-center gap-2"
               >
                 <Loader2 className="w-4 h-4 animate-spin" />
-                AI Categorizing...
+                {category ? 'Adding...' : 'AI Categorizing...'}
               </motion.div>
             ) : (
               <motion.div
@@ -241,8 +259,8 @@ export function TransactionForm() {
                 exit={{ opacity: 0 }}
                 className="flex items-center gap-2"
               >
-                <Sparkles className="w-4 h-4 text-indigo-200 group-hover:text-white transition-colors" />
-                Add with AI Categorization
+                {category ? <Plus className="w-4 h-4" /> : <Sparkles className="w-4 h-4 text-indigo-200 group-hover:text-white transition-colors" />}
+                {category ? 'Add Transaction' : 'Add with AI Categorization'}
               </motion.div>
             )}
           </AnimatePresence>

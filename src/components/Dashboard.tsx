@@ -237,15 +237,15 @@ export function Dashboard({ profile }: DashboardProps) {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <Card className="border-emerald-100 bg-emerald-50/30">
+          <Card className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white border-none shadow-lg shadow-emerald-200/50">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600">
+              <div className="p-2 bg-white/20 rounded-lg text-white">
                 <TrendingUp className="w-6 h-6" />
               </div>
-              <span className="text-xs font-medium text-emerald-600 bg-emerald-100 px-2 py-1 rounded-full">Income</span>
+              <span className="text-xs font-medium text-emerald-700 bg-white/90 px-2 py-1 rounded-full shadow-sm">Income</span>
             </div>
-            <h2 className="text-3xl font-bold text-slate-900">{formatCurrency(totalIncome, profile?.currency)}</h2>
-            <div className="flex items-center gap-1 text-emerald-600 text-xs mt-2 font-medium">
+            <h2 className="text-3xl font-bold">{formatCurrency(totalIncome, profile?.currency)}</h2>
+            <div className="flex items-center gap-1 text-emerald-50 text-xs mt-2 font-medium">
               <ArrowUpRight className="w-3 h-3" />
               <span>Total earnings</span>
             </div>
@@ -253,15 +253,15 @@ export function Dashboard({ profile }: DashboardProps) {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <Card className="border-rose-100 bg-rose-50/30">
+          <Card className="bg-gradient-to-br from-rose-500 to-orange-500 text-white border-none shadow-lg shadow-rose-200/50">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-2 bg-rose-100 rounded-lg text-rose-600">
+              <div className="p-2 bg-white/20 rounded-lg text-white">
                 <TrendingDown className="w-6 h-6" />
               </div>
-              <span className="text-xs font-medium text-rose-600 bg-rose-100 px-2 py-1 rounded-full">Expenses</span>
+              <span className="text-xs font-medium text-rose-700 bg-white/90 px-2 py-1 rounded-full shadow-sm">Expenses</span>
             </div>
-            <h2 className="text-3xl font-bold text-slate-900">{formatCurrency(totalExpenses, profile?.currency)}</h2>
-            <div className="flex items-center gap-1 text-rose-600 text-xs mt-2 font-medium">
+            <h2 className="text-3xl font-bold">{formatCurrency(totalExpenses, profile?.currency)}</h2>
+            <div className="flex items-center gap-1 text-rose-50 text-xs mt-2 font-medium">
               <ArrowDownRight className="w-3 h-3" />
               <span>Total spending</span>
             </div>

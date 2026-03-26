@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from '../firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { UserProfile } from '../types';
 import { Card, Button, Input } from './UI';
-import { Settings as SettingsIcon, Globe, User, Save, CheckCircle2 } from 'lucide-react';
+import { Settings as SettingsIcon, Globe, User, Save, CheckCircle2, Camera } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 const CURRENCIES = [
@@ -17,11 +17,17 @@ const CURRENCIES = [
   { code: 'GHS', symbol: '₵', name: 'Ghanaian Cedi' },
 ];
 
-export function Settings() {
+interface SettingsProps {
+  onSave?: () => void;
+}
+
+export function Settings({ onSave }: SettingsProps) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!auth.currentUser) return;
@@ -59,13 +65,47 @@ export function Settings() {
       await updateDoc(docRef, {
         currency: profile.currency,
         displayName: profile.displayName,
+        photoURL: profile.photoURL || null,
       });
       setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      setTimeout(() => {
+        setSuccess(false);
+        if (onSave) onSave();
+      }, 1500);
     } catch (error) {
       console.error("Failed to update profile:", error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !auth.currentUser || !profile) return;
+
+    setUploadingImage(true);
+    try {
+      // In a real app, you would upload to Firebase Storage here
+      // For this demo, we'll convert to base64 to store in Firestore
+      // Note: This is not recommended for production due to document size limits (1MB)
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        const base64String = reader.result as string;
+        
+        // Update local state
+        setProfile({ ...profile, photoURL: base64String });
+        
+        // Auto-save the image
+        const docRef = doc(db, 'users', auth.currentUser!.uid);
+        await updateDoc(docRef, {
+          photoURL: base64String
+        });
+        setUploadingImage(false);
+      };
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      setUploadingImage(false);
     }
   };
 
@@ -82,15 +122,43 @@ export function Settings() {
       <form onSubmit={handleSave} className="space-y-6">
         <Card className="p-8 space-y-6">
           <div className="flex items-center gap-4 pb-6 border-b border-slate-100">
-            <img 
-              src={auth.currentUser?.photoURL || `https://ui-avatars.com/api/?name=${profile?.displayName}`} 
-              alt="Avatar" 
-              className="w-16 h-16 rounded-full border-4 border-indigo-50"
-              referrerPolicy="no-referrer"
-            />
+            <div className="relative group">
+              <img 
+                src={profile?.photoURL || auth.currentUser?.photoURL || `https://ui-avatars.com/api/?name=${profile?.displayName}`} 
+                alt="Avatar" 
+                className="w-20 h-20 rounded-full border-4 border-indigo-50 object-cover"
+                referrerPolicy="no-referrer"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+                className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              >
+                {uploadingImage ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Camera className="w-5 h-5 text-white" />
+                )}
+              </button>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleImageUpload} 
+                accept="image/*" 
+                className="hidden" 
+              />
+            </div>
             <div>
               <h4 className="text-lg font-bold text-slate-900">{profile?.displayName}</h4>
               <p className="text-sm text-slate-500">{profile?.email}</p>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-xs text-indigo-600 font-medium mt-1 hover:underline"
+              >
+                Change Photo
+              </button>
             </div>
           </div>
 

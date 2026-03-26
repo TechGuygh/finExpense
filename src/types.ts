@@ -26,7 +26,9 @@ export interface UserProfile {
   displayName: string;
   email: string;
   currency: string;
+  photoURL?: string;
   createdAt: string;
+  priceAlerts?: PriceAlert[];
 }
 
 export interface SpendingInsight {
@@ -44,6 +46,11 @@ export interface SavingsGoal {
   deadline: string;
   category: string;
   createdAt: string;
+  autoContribute?: {
+    amount: number;
+    frequency: 'weekly' | 'monthly';
+  };
+  remindersEnabled?: boolean;
 }
 
 export interface Investment {
@@ -81,6 +88,18 @@ export interface ScenarioSimulation {
   scenarioName: string;
   projectedValue: number;
   description: string;
+}
+
+export interface PriceAlert {
+  id: string;
+  userId: string;
+  assetId: string;
+  assetName: string;
+  targetPrice: number;
+  condition: 'above' | 'below';
+  active: boolean;
+  createdAt: string;
+  triggeredAt?: string;
 }
 
 export interface AIInvestmentPlan {

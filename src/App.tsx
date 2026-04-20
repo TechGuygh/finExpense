@@ -6,11 +6,9 @@ import { Dashboard } from './components/Dashboard';
 import { TransactionForm } from './components/TransactionForm';
 import { BudgetModule } from './components/BudgetModule';
 import { SavingsInvestments } from './components/SavingsInvestments';
-import { RecurringTransactions } from './components/RecurringTransactions';
 import { AIInvestmentAdvisor } from './components/AIInvestmentAdvisor';
 import { Analytics } from './components/Analytics';
 import { SmartAIAssistant } from './components/SmartAIAssistant';
-import { MarketInsights } from './components/MarketInsights';
 import { Settings } from './components/Settings';
 import { Button } from './components/UI';
 import { db } from './firebase';
@@ -26,17 +24,87 @@ import {
   Sparkles,
   LogOut,
   PiggyBank,
-  Repeat,
   BrainCircuit,
   BarChart3,
-  Activity
+  Globe,
+  Moon,
+  Sun
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Logo } from './components/Logo';
 
-type Tab = 'dashboard' | 'analytics' | 'add' | 'budgets' | 'savings' | 'recurring' | 'advisor' | 'market' | 'settings';
+type Tab = 'dashboard' | 'analytics' | 'add' | 'budgets' | 'savings' | 'advisor' | 'settings';
 
 import { Toaster } from 'sonner';
+
+const TRANSLATIONS: Record<string, Record<string, string>> = {
+  EN: {
+    dashboard: 'Financial Overview',
+    analytics: 'Income & Expenses',
+    add: 'New Transaction',
+    recurring: 'Recurring Transactions',
+    budgets: 'Budgets & Recurring',
+    savings: 'Wealth & Markets',
+    market: 'Market Insights',
+    advisor: 'AI Investment Advisor',
+    settings: 'Settings',
+    desc_dashboard: 'Track your spending and get AI insights.',
+    desc_analytics: 'Visual insights into your financial health.',
+    desc_add: 'Add a new income or expense record.',
+    desc_budgets: 'Manage budgets and recurring transactions.',
+    desc_savings: 'Manage savings, investments and markets.',
+    desc_advisor: 'Get personalized investment recommendations.',
+    desc_settings: 'Manage your profile and preferences.',
+    nav_overview: 'Overview',
+    nav_management: 'Management',
+    nav_wealth: 'Wealth & AI',
+    nav_preferences: 'Preferences',
+  },
+  FR: {
+    dashboard: 'Aperçu Financier',
+    analytics: 'Revenus et Dépenses',
+    add: 'Nouvelle Transaction',
+    recurring: 'Transactions Récurrentes',
+    budgets: 'Budgets et Récurrents',
+    savings: 'Richesse et Marchés',
+    market: 'Aperçus du Marché',
+    advisor: 'Conseiller en Investissement IA',
+    settings: 'Paramètres',
+    desc_dashboard: 'Suivez vos dépenses et obtenez des conseils IA.',
+    desc_analytics: 'Aperçus visuels de votre santé financière.',
+    desc_add: 'Ajoutez un nouveau revenu ou une dépense.',
+    desc_budgets: 'Gérez les budgets et les transactions récurrentes.',
+    desc_savings: 'Gérez l\'épargne, les investissements et les marchés.',
+    desc_advisor: 'Obtenez des recommandations d\'investissement personnalisées.',
+    desc_settings: 'Gérez votre profil et vos préférences.',
+    nav_overview: 'Aperçu',
+    nav_management: 'Gestion',
+    nav_wealth: 'Richesse et IA',
+    nav_preferences: 'Préférences',
+  },
+  ES: {
+    dashboard: 'Resumen Financiero',
+    analytics: 'Ingresos y Gastos',
+    add: 'Nueva Transacción',
+    recurring: 'Transacciones Recurrentes',
+    budgets: 'Presupuestos y Recurrentes',
+    savings: 'Riqueza y Mercados',
+    market: 'Perspectivas del Mercado',
+    advisor: 'Asesor de Inversiones con IA',
+    settings: 'Configuración',
+    desc_dashboard: 'Haz un seguimiento de tus gastos y obtén consejos de IA.',
+    desc_analytics: 'Perspectivas visuales de tu salud financiera.',
+    desc_add: 'Añade un nuevo registro de ingresos o gastos.',
+    desc_budgets: 'Gestiona presupuestos y transacciones recurrentes.',
+    desc_savings: 'Gestiona ahorros, inversiones y mercados.',
+    desc_advisor: 'Obtén recomendaciones de inversión personalizadas.',
+    desc_settings: 'Gestiona tu perfil y preferencias.',
+    nav_overview: 'Resumen',
+    nav_management: 'Gestión',
+    nav_wealth: 'Riqueza e IA',
+    nav_preferences: 'Preferencias',
+  }
+};
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -45,6 +113,30 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [language, setLanguage] = useState(localStorage.getItem('app_language') || 'EN');
+  const [isDarkMode, setIsDarkMode] = useState(
+    localStorage.getItem('app_theme') === 'dark' || 
+    (!localStorage.getItem('app_theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  );
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('app_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('app_theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
+
+  const handleLanguageChange = (lang: string) => {
+    setLanguage(lang);
+    localStorage.setItem('app_language', lang);
+  };
+
+  const t = (key: string) => TRANSLATIONS[language]?.[key] || TRANSLATIONS['EN'][key] || key;
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -136,10 +228,10 @@ export default function App() {
 
   if (!isAuthReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-500 font-medium animate-pulse">Initializing SUSU...</p>
+          <p className="text-slate-500 dark:text-slate-400 font-medium animate-pulse transition-colors duration-200">Initializing SUSU...</p>
         </div>
       </div>
     );
@@ -151,63 +243,61 @@ export default function App() {
 
   const navGroups = [
     {
-      title: 'Overview',
+      title: t('nav_overview'),
       items: [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+        { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
+        { id: 'analytics', label: t('analytics'), icon: BarChart3 },
       ]
     },
     {
-      title: 'Management',
+      title: t('nav_management'),
       items: [
-        { id: 'add', label: 'Transactions', icon: PlusCircle },
-        { id: 'recurring', label: 'Recurring', icon: Repeat },
-        { id: 'budgets', label: 'Budgets', icon: Target },
+        { id: 'add', label: t('add'), icon: PlusCircle },
+        { id: 'budgets', label: t('budgets'), icon: Target },
       ]
     },
     {
-      title: 'Wealth & AI',
+      title: t('nav_wealth'),
       items: [
-        { id: 'savings', label: 'Savings & Invest', icon: PiggyBank },
-        { id: 'market', label: 'Market Insights', icon: Activity },
-        { id: 'advisor', label: 'AI Advisor', icon: BrainCircuit },
+        { id: 'savings', label: t('savings'), icon: PiggyBank },
+        { id: 'advisor', label: t('advisor'), icon: BrainCircuit },
       ]
     },
     {
-      title: 'Preferences',
+      title: t('nav_preferences'),
       items: [
-        { id: 'settings', label: 'Settings', icon: SettingsIcon },
+        { id: 'settings', label: t('settings'), icon: SettingsIcon },
       ]
     }
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col lg:flex-row transition-colors duration-200">
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex w-72 bg-white border-r border-slate-200 flex-col sticky top-0 h-screen">
+      <aside className="hidden lg:flex w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-col sticky top-0 h-screen transition-colors duration-200">
         <div className="p-6 flex flex-col h-full overflow-hidden">
           <div className="flex items-center gap-3 mb-8 px-2 shrink-0">
-            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-slate-100 border border-slate-100">
+            <div className="w-10 h-10 bg-white dark:bg-slate-700 rounded-xl flex items-center justify-center shadow-lg shadow-slate-100 dark:shadow-none border border-slate-100 dark:border-slate-600 transition-colors duration-200">
               <Logo className="w-6 h-6" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">SUSU</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white transition-colors duration-200">SUSU</h1>
           </div>
 
           {/* User Profile - Top */}
-          <div className="flex items-center gap-3 px-4 py-3 mb-6 bg-slate-50 rounded-xl border border-slate-100 shrink-0">
+          <div className="flex items-center gap-3 px-4 py-3 mb-6 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-600 shrink-0 transition-colors duration-200">
             <img 
               src={profile?.photoURL || user.photoURL || `https://ui-avatars.com/api/?name=${profile?.displayName || user.displayName || 'Guest'}`} 
               alt="Profile" 
-              className="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover"
+              className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-600 shadow-sm object-cover transition-colors duration-200"
               referrerPolicy="no-referrer"
             />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-slate-900 truncate">{profile?.displayName || user.displayName || 'Guest User'}</p>
-              <p className="text-xs text-slate-500 truncate">{profile?.email || user.email || 'Anonymous'}</p>
+              <p className="text-sm font-bold text-slate-900 dark:text-white truncate transition-colors duration-200">{profile?.displayName || user.displayName || 'Guest User'}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate transition-colors duration-200">{profile?.email || user.email || 'Anonymous'}</p>
             </div>
             <button 
               onClick={() => setShowLogoutConfirm(true)}
-              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors"
               title="Logout"
             >
               <LogOut className="w-5 h-5" />
@@ -218,7 +308,7 @@ export default function App() {
           <nav className="flex-1 overflow-y-auto pr-2 -mr-2 space-y-6 custom-scrollbar pb-12">
             {navGroups.map((group, idx) => (
               <div key={idx} className="space-y-1">
-                <h3 className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                <h3 className="px-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-200">
                   {group.title}
                 </h3>
                 {group.items.map((item) => (
@@ -227,11 +317,11 @@ export default function App() {
                     onClick={() => setActiveTab(item.id as Tab)}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium transition-all ${
                       activeTab === item.id
-                        ? 'bg-emerald-50 text-[#279d48] shadow-sm'
-                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-brand-primary-light dark:bg-brand-primary-dark/20 text-brand-primary dark:text-brand-primary-light shadow-sm'
+                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
-                    <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-[#279d48]' : 'text-slate-400'}`} />
+                    <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-brand-primary dark:text-brand-primary-light' : 'text-slate-400 dark:text-slate-500'}`} />
                     {item.label}
                   </button>
                 ))}
@@ -239,37 +329,27 @@ export default function App() {
             ))}
           </nav>
 
-          <div className="mt-6 pt-6 border-t border-slate-100 shrink-0">
-            <div className="bg-[#279d48] rounded-2xl p-4 text-white relative overflow-hidden">
-              <Sparkles className="absolute -right-2 -top-2 w-16 h-16 text-white/10 rotate-12" />
-              <h4 className="text-sm font-bold mb-1">SUSU Premium</h4>
-              <p className="text-[10px] text-white/80 mb-3">Unlock advanced AI forecasting and multi-currency support.</p>
-              <Button size="sm" className="w-full bg-white text-[#279d48] hover:bg-emerald-50 border-none">
-                Upgrade Now
-              </Button>
-            </div>
-          </div>
         </div>
       </aside>
 
       {/* Mobile Header */}
-      <header className="lg:hidden bg-white border-b border-slate-200 p-4 sticky top-0 z-50 flex items-center justify-between">
+      <header className="lg:hidden bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 sticky top-0 z-50 flex items-center justify-between transition-colors duration-200">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-slate-100">
+          <div className="w-8 h-8 bg-white dark:bg-slate-700 rounded-lg flex items-center justify-center border border-slate-100 dark:border-slate-600 transition-colors duration-200">
             <Logo className="w-5 h-5" />
           </div>
-          <h1 className="text-xl font-bold text-slate-900">SUSU</h1>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-white transition-colors duration-200">SUSU</h1>
         </div>
         <div className="flex items-center gap-3">
           <img 
             src={profile?.photoURL || user.photoURL || `https://ui-avatars.com/api/?name=${profile?.displayName || user.displayName || 'Guest'}`} 
             alt="Profile" 
-            className="w-8 h-8 rounded-full border border-slate-200 object-cover"
+            className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-600 object-cover transition-colors duration-200"
             referrerPolicy="no-referrer"
           />
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -283,26 +363,26 @@ export default function App() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="lg:hidden fixed inset-x-0 top-[73px] bottom-0 bg-white border-b border-slate-200 z-40 flex flex-col shadow-xl overflow-hidden"
+            className="lg:hidden fixed inset-x-0 top-[73px] bottom-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 z-40 flex flex-col shadow-xl overflow-hidden transition-colors duration-200"
           >
             <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-24">
               {/* User Profile - Mobile */}
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 mb-6">
+              <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-600 mb-6 transition-colors duration-200">
                 <div className="flex items-center gap-3 min-w-0">
                   <img 
                     src={profile?.photoURL || user.photoURL || `https://ui-avatars.com/api/?name=${profile?.displayName || user.displayName || 'Guest'}`} 
                     alt="Profile" 
-                    className="w-10 h-10 rounded-full border-2 border-white shadow-sm shrink-0 object-cover"
+                    className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-600 shadow-sm shrink-0 object-cover transition-colors duration-200"
                     referrerPolicy="no-referrer"
                   />
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-900 truncate">{profile?.displayName || user.displayName || 'Guest User'}</p>
-                    <p className="text-xs text-slate-500 truncate">{profile?.email || user.email || 'Anonymous'}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white truncate transition-colors duration-200">{profile?.displayName || user.displayName || 'Guest User'}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate transition-colors duration-200">{profile?.email || user.email || 'Anonymous'}</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setShowLogoutConfirm(true)}
-                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors shrink-0"
+                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors shrink-0"
                   title="Logout"
                 >
                   <LogOut className="w-5 h-5" />
@@ -311,7 +391,7 @@ export default function App() {
 
               {navGroups.map((group, idx) => (
                 <div key={idx} className="space-y-1">
-                  <h3 className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                  <h3 className="px-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-200">
                     {group.title}
                   </h3>
                   {group.items.map((item) => (
@@ -323,11 +403,11 @@ export default function App() {
                       }}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${
                         activeTab === item.id
-                          ? 'bg-emerald-50 text-[#279d48]'
-                          : 'text-slate-500 hover:bg-slate-50'
+                          ? 'bg-brand-primary-light dark:bg-brand-primary-dark/20 text-brand-primary dark:text-brand-primary-light'
+                          : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                       }`}
                     >
-                      <item.icon className="w-5 h-5" />
+                      <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-brand-primary dark:text-brand-primary-light' : 'text-slate-400 dark:text-slate-500'}`} />
                       {item.label}
                     </button>
                   ))}
@@ -342,26 +422,36 @@ export default function App() {
       <main className="flex-1 p-4 lg:p-10 max-w-7xl mx-auto w-full pb-32">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900">
-              {activeTab === 'dashboard' ? 'Financial Overview' : 
-               activeTab === 'analytics' ? 'Income & Expenses' : 
-               activeTab === 'add' ? 'New Transaction' : 
-               activeTab === 'recurring' ? 'Recurring Transactions' : 
-               activeTab === 'budgets' ? 'Budget Planning' : 
-               activeTab === 'savings' ? 'Savings & Investments' : 
-               activeTab === 'market' ? 'Market Insights' : 
-               activeTab === 'advisor' ? 'AI Investment Advisor' : 'Settings'}
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white transition-colors duration-200">
+              {t(activeTab)}
             </h2>
-            <p className="text-slate-500 mt-1">
-              {activeTab === 'dashboard' ? 'Track your spending and get AI insights.' : 
-               activeTab === 'analytics' ? 'Visual insights into your financial health.' : 
-               activeTab === 'add' ? 'Add a new income or expense record.' : 
-               activeTab === 'recurring' ? 'Manage subscriptions and regular income.' : 
-               activeTab === 'budgets' ? 'Set monthly limits for your categories.' : 
-               activeTab === 'savings' ? 'Set goals and track your portfolio.' : 
-               activeTab === 'market' ? 'Real-time market data and investment trends.' : 
-               activeTab === 'advisor' ? 'Get personalized investment recommendations.' : 'Manage your profile and preferences.'}
+            <p className="text-slate-500 dark:text-slate-400 mt-1 transition-colors duration-200">
+              {t(`desc_${activeTab}`)}
             </p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <div className="relative group">
+              <button className="p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl transition-colors flex items-center gap-2">
+                <Globe className="w-5 h-5" />
+                <span className="text-sm font-medium hidden sm:block">{language}</span>
+              </button>
+              <div className="absolute right-0 top-full mt-2 w-40 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                <div className="p-2 space-y-1">
+                  <button onClick={() => handleLanguageChange('EN')} className={`w-full text-left px-3 py-2 text-sm rounded-lg font-medium transition-colors ${language === 'EN' ? 'bg-brand-primary-light dark:bg-brand-primary-dark/20 text-brand-primary dark:text-brand-primary-light' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>English (EN)</button>
+                  <button onClick={() => handleLanguageChange('FR')} className={`w-full text-left px-3 py-2 text-sm rounded-lg font-medium transition-colors ${language === 'FR' ? 'bg-brand-primary-light dark:bg-brand-primary-dark/20 text-brand-primary dark:text-brand-primary-light' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>French (FR)</button>
+                  <button onClick={() => handleLanguageChange('ES')} className={`w-full text-left px-3 py-2 text-sm rounded-lg font-medium transition-colors ${language === 'ES' ? 'bg-brand-primary-light dark:bg-brand-primary-dark/20 text-brand-primary dark:text-brand-primary-light' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>Spanish (ES)</button>
+                </div>
+              </div>
+            </div>
+            
+            <button 
+              onClick={toggleDarkMode}
+              className="p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
+              title="Toggle Dark Mode"
+            >
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
           </div>
         </div>
 
@@ -380,10 +470,8 @@ export default function App() {
                 <TransactionForm />
               </div>
             )}
-            {activeTab === 'recurring' && <RecurringTransactions profile={profile} />}
             {activeTab === 'budgets' && <BudgetModule profile={profile} />}
             {activeTab === 'savings' && <SavingsInvestments profile={profile} />}
-            {activeTab === 'market' && <MarketInsights profile={profile} />}
             {activeTab === 'advisor' && <AIInvestmentAdvisor profile={profile} />}
             {activeTab === 'settings' && <Settings onSave={() => setActiveTab('dashboard')} />}
           </motion.div>
@@ -401,18 +489,18 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
+              className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden transition-colors duration-200"
             >
               <div className="p-6 text-center">
-                <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-rose-100 dark:bg-rose-500/10 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-200">
                   <LogOut className="w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Log Out</h3>
-                <p className="text-slate-500 mb-6">Are you sure you want to log out of your account?</p>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 transition-colors duration-200">Log Out</h3>
+                <p className="text-slate-500 dark:text-slate-400 mb-6 transition-colors duration-200">Are you sure you want to log out of your account?</p>
                 <div className="flex gap-3">
                   <Button 
                     variant="outline" 
-                    className="flex-1"
+                    className="flex-1 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
                     onClick={() => setShowLogoutConfirm(false)}
                   >
                     Cancel

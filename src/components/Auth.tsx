@@ -173,9 +173,9 @@ export function Auth() {
                 )}
                 
                 {successMsg && (
-                  <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3 text-left">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                    <p className="text-sm text-emerald-700 font-medium">{successMsg}</p>
+                  <div className="mb-6 p-4 bg-brand-primary-light border border-brand-primary-light rounded-xl flex items-start gap-3 text-left">
+                    <CheckCircle2 className="w-5 h-5 text-brand-primary shrink-0 mt-0.5" />
+                    <p className="text-sm text-brand-primary-dark font-medium">{successMsg}</p>
                   </div>
                 )}
 
@@ -190,7 +190,7 @@ export function Auth() {
                         type="email" 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#279d48] focus:border-transparent transition-all"
+                        className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
                         placeholder="you@example.com"
                         required
                       />
@@ -207,7 +207,7 @@ export function Auth() {
                         type={showPassword ? "text" : "password"} 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full pl-11 pr-12 py-3.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#279d48] focus:border-transparent transition-all"
+                        className="w-full pl-11 pr-12 py-3.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
                         placeholder="••••••••"
                         required
                       />
@@ -227,14 +227,14 @@ export function Auth() {
                         type="checkbox" 
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
-                        className="w-4 h-4 rounded border-slate-300 text-[#279d48] focus:ring-[#279d48]"
+                        className="w-4 h-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
                       />
                       <span className="text-sm text-slate-600">Remember me</span>
                     </label>
                     <button 
                       type="button" 
                       onClick={handleForgotPassword}
-                      className="text-sm font-medium text-[#279d48] hover:text-emerald-700"
+                      className="text-sm font-medium text-brand-primary hover:text-brand-primary-hover"
                     >
                       Forgot Password?
                     </button>
@@ -243,7 +243,7 @@ export function Auth() {
                   <button 
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-[#279d48] text-white py-3.5 px-4 rounded-xl font-bold text-[16px] hover:bg-emerald-600 transition-colors disabled:opacity-50 flex justify-center items-center"
+                    className="w-full bg-brand-primary text-white py-3.5 px-4 rounded-xl font-bold text-[16px] hover:bg-brand-primary-hover transition-colors disabled:opacity-50 flex justify-center items-center"
                   >
                     {loading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : "Login"}
                   </button>
@@ -272,7 +272,7 @@ export function Auth() {
                 <div className="mt-8 text-center">
                   <p className="text-slate-600">
                     Don't have an account?{' '}
-                    <button onClick={() => { setIsLogin(false); setErrorMsg(null); }} className="font-bold text-[#279d48] hover:text-emerald-700">
+                    <button onClick={() => { setIsLogin(false); setErrorMsg(null); }} className="font-bold text-brand-primary hover:text-brand-primary-hover">
                       Sign up
                     </button>
                   </p>
@@ -308,7 +308,7 @@ export function Auth() {
                         type="text" 
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#279d48] focus:border-transparent transition-all"
+                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
                         placeholder="John Doe"
                         required
                       />
@@ -325,7 +325,7 @@ export function Auth() {
                         type="email" 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#279d48] focus:border-transparent transition-all"
+                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
                         placeholder="you@example.com"
                         required
                       />
@@ -342,7 +342,7 @@ export function Auth() {
                         type="tel" 
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#279d48] focus:border-transparent transition-all"
+                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
                         placeholder="+1 (555) 000-0000"
                       />
                     </div>
@@ -358,7 +358,7 @@ export function Auth() {
                         type={showPassword ? "text" : "password"} 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full pl-11 pr-12 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#279d48] focus:border-transparent transition-all"
+                        className="w-full pl-11 pr-12 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
                         placeholder="••••••••"
                         required
                       />
@@ -378,7 +378,7 @@ export function Auth() {
                             key={level} 
                             className={`flex-1 rounded-full ${
                               passwordStrength >= level 
-                                ? passwordStrength < 2 ? 'bg-rose-500' : passwordStrength < 3 ? 'bg-amber-400' : 'bg-emerald-500'
+                                ? passwordStrength < 2 ? 'bg-rose-500' : passwordStrength < 3 ? 'bg-amber-400' : 'bg-brand-primary'
                                 : 'bg-slate-200'
                             }`}
                           />
@@ -398,7 +398,7 @@ export function Auth() {
                         type={showPassword ? "text" : "password"} 
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#279d48] focus:border-transparent transition-all"
+                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
                         placeholder="••••••••"
                         required
                       />
@@ -411,10 +411,10 @@ export function Auth() {
                         type="checkbox" 
                         checked={acceptTerms}
                         onChange={(e) => setAcceptTerms(e.target.checked)}
-                        className="mt-1 w-4 h-4 rounded border-slate-300 text-[#279d48] focus:ring-[#279d48]"
+                        className="mt-1 w-4 h-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
                       />
                       <span className="text-sm text-slate-600 leading-relaxed">
-                        I agree to the <a href="#" className="text-[#279d48] hover:underline">Terms & Conditions</a> and <a href="#" className="text-[#279d48] hover:underline">Privacy Policy</a>.
+                        I agree to the <a href="#" className="text-brand-primary hover:underline">Terms & Conditions</a> and <a href="#" className="text-brand-primary hover:underline">Privacy Policy</a>.
                       </span>
                     </label>
                   </div>
@@ -422,7 +422,7 @@ export function Auth() {
                   <button 
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-[#279d48] text-white py-3.5 px-4 rounded-xl font-bold text-[16px] hover:bg-emerald-600 transition-colors disabled:opacity-50 flex justify-center items-center mt-6"
+                    className="w-full bg-brand-primary text-white py-3.5 px-4 rounded-xl font-bold text-[16px] hover:bg-brand-primary-hover transition-colors disabled:opacity-50 flex justify-center items-center mt-6"
                   >
                     {loading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : "Create Account"}
                   </button>
@@ -431,7 +431,7 @@ export function Auth() {
                 <div className="mt-8 text-center">
                   <p className="text-slate-600">
                     Already have an account?{' '}
-                    <button onClick={() => { setIsLogin(true); setErrorMsg(null); }} className="font-bold text-[#279d48] hover:text-emerald-700">
+                    <button onClick={() => { setIsLogin(true); setErrorMsg(null); }} className="font-bold text-brand-primary hover:text-brand-primary-hover">
                       Log in
                     </button>
                   </p>

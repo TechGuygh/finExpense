@@ -110,3 +110,30 @@ export interface AIInvestmentPlan {
   behavioralNudge: string;
   scenarios: ScenarioSimulation[];
 }
+
+export interface BudgetRecommendation {
+  category: string;
+  suggestedLimit: number;
+  reason: string;
+}
+
+export interface FinancialChallenge {
+  id: string;
+  title: string;
+  description: string;
+  targetAmount: number;
+  durationDays: number;
+  rewardPoints: number;
+  category?: string;
+  type: 'savings' | 'spending_reduction' | 'no_spend';
+}
+
+export interface UserChallenge {
+  id: string;
+  userId: string;
+  challengeId: string;
+  status: 'active' | 'completed' | 'failed';
+  progress: number;
+  joinedAt: string;
+  completedAt?: string;
+}

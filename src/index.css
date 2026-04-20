@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-primary: #279d48;
+  --color-brand-primary-hover: #20823c;
+  --color-brand-primary-light: #e9f5ec;
+  --color-brand-primary-dark: #1a662f;
+  
+  --color-brand-secondary: #f29111;
+  --color-brand-secondary-hover: #d9820f;
+  --color-brand-secondary-light: #fef4e7;
+  --color-brand-secondary-dark: #bf720d;
+}
+
 @layer utilities {
   .custom-scrollbar::-webkit-scrollbar {
     width: 4px;

@@ -3,7 +3,7 @@ import { db, auth } from '../firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { UserProfile } from '../types';
 import { Card, Button, Input } from './UI';
-import { Settings as SettingsIcon, Globe, User, Save, CheckCircle2, Camera } from 'lucide-react';
+import { Settings as SettingsIcon, Globe, User, Save, CheckCircle2, Camera, CreditCard, History, UserCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 const CURRENCIES = [
@@ -120,13 +120,13 @@ export function Settings({ onSave }: SettingsProps) {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <form onSubmit={handleSave} className="space-y-6">
-        <Card className="p-8 space-y-6">
-          <div className="flex items-center gap-4 pb-6 border-b border-slate-100">
+        <Card className="p-8 space-y-6 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-4 pb-6 border-b border-slate-100 dark:border-slate-700">
             <div className="relative group">
               <img 
                 src={profile?.photoURL || auth.currentUser?.photoURL || `https://ui-avatars.com/api/?name=${profile?.displayName}`} 
                 alt="Avatar" 
-                className="w-20 h-20 rounded-full border-4 border-indigo-50 object-cover"
+                className="w-20 h-20 rounded-full border-4 border-indigo-50 dark:border-slate-700 object-cover"
                 referrerPolicy="no-referrer"
               />
               <button
@@ -150,12 +150,12 @@ export function Settings({ onSave }: SettingsProps) {
               />
             </div>
             <div>
-              <h4 className="text-lg font-bold text-slate-900">{profile?.displayName}</h4>
-              <p className="text-sm text-slate-500">{profile?.email}</p>
+              <h4 className="text-lg font-bold text-slate-900 dark:text-slate-100">{profile?.displayName}</h4>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{profile?.email}</p>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="text-xs text-indigo-600 font-medium mt-1 hover:underline"
+                className="text-xs text-brand-primary dark:text-brand-primary-light font-medium mt-1 hover:underline"
               >
                 Change Photo
               </button>
@@ -176,14 +176,14 @@ export function Settings({ onSave }: SettingsProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
                 <Globe className="w-3 h-3" />
                 Preferred Currency
               </label>
               <select
                 value={profile?.currency}
                 onChange={(e) => setProfile(prev => prev ? { ...prev, currency: e.target.value } : null)}
-                className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="flex h-10 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-primary"
               >
                 {CURRENCIES.map((c) => (
                   <option key={c.code} value={c.code}>
@@ -204,7 +204,7 @@ export function Settings({ onSave }: SettingsProps) {
                   initial={{ opacity: 0, x: -10 }} 
                   animate={{ opacity: 1, x: 0 }} 
                   exit={{ opacity: 0 }}
-                  className="flex items-center gap-2 text-emerald-600 text-sm font-medium"
+                  className="flex items-center gap-2 text-brand-primary text-sm font-medium"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   Settings saved successfully!
@@ -222,11 +222,49 @@ export function Settings({ onSave }: SettingsProps) {
           </div>
         </Card>
 
-        <Card className="p-6 bg-indigo-50/50 border-indigo-100">
-          <h4 className="text-sm font-bold text-indigo-900 mb-2">Data Management</h4>
-          <p className="text-xs text-indigo-700 mb-4 leading-relaxed">
+        <Card className="p-6 bg-brand-primary/5 dark:bg-brand-primary-dark/10 border-brand-primary/20 dark:border-brand-primary-dark/30">
+          <h4 className="text-sm font-bold text-brand-primary-dark dark:text-brand-primary-light mb-2">Data Management</h4>
+          <p className="text-xs text-brand-primary-dark/80 dark:text-brand-primary-light/80 mb-4 leading-relaxed">
             Your data is stored securely in our cloud database. You can export your transactions to CSV from the Dashboard at any time.
           </p>
+        </Card>
+
+        <Card className="p-6 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+          <h4 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-6">Customer Attributes</h4>
+          <div className="space-y-6">
+            <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700">
+              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                <CreditCard className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <h5 className="text-sm font-bold text-slate-900 dark:text-slate-100">Subscription Tier</h5>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">You are currently on the <span className="font-semibold text-brand-primary dark:text-brand-primary-light">SUSU Premium</span> plan.</p>
+                <button type="button" className="text-xs font-medium text-brand-primary dark:text-brand-primary-light mt-2 hover:underline">Manage Subscription</button>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700">
+              <div className="w-10 h-10 rounded-full bg-brand-primary-light/50 dark:bg-brand-primary-dark/30 text-brand-primary dark:text-brand-primary-light flex items-center justify-center shrink-0">
+                <History className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <h5 className="text-sm font-bold text-slate-900 dark:text-slate-100">Purchase History</h5>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">View your past subscription payments and billing history.</p>
+                <button type="button" className="text-xs font-medium text-brand-primary dark:text-brand-primary-light mt-2 hover:underline">View History</button>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700">
+              <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                <UserCheck className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <h5 className="text-sm font-bold text-slate-900 dark:text-slate-100">Account Manager</h5>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Your dedicated account manager is <span className="font-semibold text-slate-700 dark:text-slate-300">Sarah Jenkins</span>.</p>
+                <button type="button" className="text-xs font-medium text-purple-600 dark:text-purple-400 mt-2 hover:underline">Contact Manager</button>
+              </div>
+            </div>
+          </div>
         </Card>
       </form>
     </div>

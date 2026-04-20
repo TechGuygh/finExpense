@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { Transaction, SpendingInsight, Budget, SavingsGoal, Investment, AIInvestmentPlan } from "../types";
+import { Transaction, SpendingInsight, Budget, SavingsGoal, Investment, AIInvestmentPlan, BudgetRecommendation } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
@@ -208,5 +208,54 @@ export async function getInvestmentAdvice(
   } catch (error) {
     console.error("AI Investment Advice failed:", error);
     return null;
+  }
+}
+
+export async function generateBudgetRecommendations(
+  transactions: Transaction[],
+  currentIncome: number
+): Promise<BudgetRecommendation[]> {
+  try {
+    const expenses = transactions.filter(t => t.type === 'expense');
+    const income = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0) || currentIncome;
+    
+    const contextData = {
+      recentExpenses: expenses.map(t => ({ category: t.category, amount: t.amount, date: t.date })),
+      totalIncome: income
+    };
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.1-pro-preview",
+      contents: `You are an expert financial advisor. Analyze the user's historical transactions and income to generate balanced personalized budget limits for different spending categories.
+      
+      User Data: ${JSON.stringify(contextData)}
+      
+      Provide a list of recommended budget limits for their most common or necessary categories (e.g., Groceries, Entertainment, Utilities, Transport). Do not allocate 100% of their income to expenses; leave room for savings.
+      
+      Return the response strictly as a JSON array of objects. Each object must have:
+      - 'category' (string)
+      - 'suggestedLimit' (number)
+      - 'reason' (string, explaining why this limit is optimal based on their data).`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              category: { type: Type.STRING },
+              suggestedLimit: { type: Type.NUMBER },
+              reason: { type: Type.STRING }
+            },
+            required: ["category", "suggestedLimit", "reason"]
+          }
+        }
+      }
+    });
+
+    return JSON.parse(response.text || "[]");
+  } catch (error) {
+    console.error("AI Budget Recommendations failed:", error);
+    return [];
   }
 }

@@ -54,7 +54,9 @@ service cloud.firestore {
       return data.userId == request.auth.uid &&
              data.category is string && data.category.size() < 100 &&
              data.limit is number && data.limit >= 0 &&
-             data.month is string;
+             data.month is string &&
+             (!('rollover' in data) || data.rollover is bool) &&
+             (!('type' in data) || data.type in ['income', 'expense']);
     }
 
     function isValidSavingsGoal(data) {
@@ -85,6 +87,14 @@ service cloud.firestore {
              data.startDate is string &&
              data.nextDate is string &&
              data.createdAt is string;
+    }
+
+    function isValidUserChallenge(data) {
+      return data.userId == request.auth.uid &&
+             data.challengeId is string &&
+             data.status in ['active', 'completed', 'failed'] &&
+             data.progress is number && data.progress >= 0 && data.progress <= 100 &&
+             data.joinedAt is string;
     }
 
     match /users/{userId} {
@@ -123,6 +133,13 @@ service cloud.firestore {
       allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
       allow create: if isAuthenticated() && isValidRecurring(request.resource.data);
       allow update: if isAuthenticated() && isDocOwner() && isValidRecurring(request.resource.data);
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+
+    match /userChallenges/{challengeId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidUserChallenge(request.resource.data);
+      allow update: if isAuthenticated() && isDocOwner() && isValidUserChallenge(request.resource.data);
       allow delete: if isAuthenticated() && isDocOwner();
     }
   }

@@ -311,16 +311,16 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-900">Market Insights</h2>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Market Insights</h2>
         <Button 
           variant="outline" 
           onClick={() => setShowAlertsModal(true)}
-          className="flex items-center gap-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-800 transition-colors shadow-sm"
+          className="flex items-center gap-2 border-brand-primary/30 text-brand-primary hover:bg-brand-primary/10 dark:border-brand-primary-dark/50 dark:text-brand-primary-light dark:hover:bg-brand-primary-dark/30 transition-colors shadow-sm"
         >
           <Bell className="w-4 h-4" />
           Price Alerts
           {alerts.filter(a => a.active).length > 0 && (
-            <span className="bg-indigo-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
+            <span className="bg-brand-primary dark:bg-brand-primary-light text-white dark:text-brand-primary-dark text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
               {alerts.filter(a => a.active).length}
             </span>
           )}
@@ -329,62 +329,62 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
 
       {/* Investment Trends */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-100">
+        <Card className="p-4 bg-gradient-to-br from-brand-primary-light to-brand-primary-light/50 border-brand-primary-light dark:from-brand-primary-dark/40 dark:to-brand-primary-dark/20 dark:border-brand-primary-dark/50">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold text-emerald-800 flex items-center gap-1">
+            <span className="text-sm font-semibold text-brand-primary-dark dark:text-brand-primary-light flex items-center gap-1">
               <TrendingUp className="w-4 h-4" /> Top Gainer
             </span>
-            <span className="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-full">+{topGainer?.changePercent.toFixed(2)}%</span>
+            <span className="text-xs font-bold text-brand-primary bg-brand-primary-light dark:bg-brand-primary-dark/50 dark:text-brand-primary-light px-2 py-1 rounded-full">+{topGainer?.changePercent.toFixed(2)}%</span>
           </div>
           <div className="flex items-center gap-3">
             {topGainer?.logo ? (
-              <img src={topGainer.logo} alt={topGainer.name} className="w-8 h-8 rounded-full object-cover bg-white p-0.5 shadow-sm" referrerPolicy="no-referrer" />
+              <img src={topGainer.logo} alt={topGainer.name} className="w-8 h-8 rounded-full object-cover bg-white dark:bg-slate-800 p-0.5 shadow-sm" referrerPolicy="no-referrer" />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-emerald-200 flex items-center justify-center text-emerald-700 font-bold text-xs">{topGainer?.id.substring(0, 2)}</div>
+              <div className="w-8 h-8 rounded-full bg-brand-primary-light text-brand-primary-dark dark:bg-brand-primary-dark/50 dark:text-brand-primary-light flex items-center justify-center font-bold text-xs">{topGainer?.id.substring(0, 2)}</div>
             )}
             <div>
-              <p className="font-bold text-slate-900">{topGainer?.name}</p>
-              <p className="text-sm text-slate-600">{formatCurrency(topGainer?.price || 0, topGainer?.assetCurrency || profile?.currency || 'USD')}</p>
+              <p className="font-bold text-slate-900 dark:text-slate-100">{topGainer?.name}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">{formatCurrency(topGainer?.price || 0, topGainer?.assetCurrency || profile?.currency || 'USD')}</p>
             </div>
           </div>
         </Card>
         
-        <Card className="p-4 bg-gradient-to-br from-rose-50 to-rose-100/50 border-rose-100">
+        <Card className="p-4 bg-gradient-to-br from-rose-50 to-rose-100/50 border-rose-100 dark:from-rose-900/40 dark:to-rose-900/20 dark:border-rose-800/50">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold text-rose-800 flex items-center gap-1">
+            <span className="text-sm font-semibold text-rose-800 dark:text-rose-400 flex items-center gap-1">
               <TrendingDown className="w-4 h-4" /> Top Loser
             </span>
-            <span className="text-xs font-bold text-rose-600 bg-rose-100 px-2 py-1 rounded-full">{topLoser?.changePercent.toFixed(2)}%</span>
+            <span className="text-xs font-bold text-rose-600 bg-rose-100 dark:bg-rose-900/50 dark:text-rose-300 px-2 py-1 rounded-full">{topLoser?.changePercent.toFixed(2)}%</span>
           </div>
           <div className="flex items-center gap-3">
             {topLoser?.logo ? (
-              <img src={topLoser.logo} alt={topLoser.name} className="w-8 h-8 rounded-full object-cover bg-white p-0.5 shadow-sm" referrerPolicy="no-referrer" />
+              <img src={topLoser.logo} alt={topLoser.name} className="w-8 h-8 rounded-full object-cover bg-white dark:bg-slate-800 p-0.5 shadow-sm" referrerPolicy="no-referrer" />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-rose-200 flex items-center justify-center text-rose-700 font-bold text-xs">{topLoser?.id.substring(0, 2)}</div>
+              <div className="w-8 h-8 rounded-full bg-rose-200 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300 flex items-center justify-center font-bold text-xs">{topLoser?.id.substring(0, 2)}</div>
             )}
             <div>
-              <p className="font-bold text-slate-900">{topLoser?.name}</p>
-              <p className="text-sm text-slate-600">{formatCurrency(topLoser?.price || 0, topLoser?.assetCurrency || profile?.currency || 'USD')}</p>
+              <p className="font-bold text-slate-900 dark:text-slate-100">{topLoser?.name}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">{formatCurrency(topLoser?.price || 0, topLoser?.assetCurrency || profile?.currency || 'USD')}</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4 bg-gradient-to-br from-indigo-50 to-indigo-100/50 border-indigo-100">
+        <Card className="p-4 bg-gradient-to-br from-indigo-50 to-indigo-100/50 border-indigo-100 dark:from-indigo-900/40 dark:to-indigo-900/20 dark:border-indigo-800/50">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold text-indigo-800 flex items-center gap-1">
+            <span className="text-sm font-semibold text-indigo-800 dark:text-indigo-400 flex items-center gap-1">
               <Activity className="w-4 h-4" /> Most Active
             </span>
-            <span className="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full">GSE</span>
+            <span className="text-xs font-bold text-indigo-600 bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-300 px-2 py-1 rounded-full">GSE</span>
           </div>
           <div className="flex items-center gap-3">
             {mostActive?.logo ? (
-              <img src={mostActive.logo} alt={mostActive.name} className="w-8 h-8 rounded-full object-cover bg-white p-0.5 shadow-sm" referrerPolicy="no-referrer" />
+              <img src={mostActive.logo} alt={mostActive.name} className="w-8 h-8 rounded-full object-cover bg-white dark:bg-slate-800 p-0.5 shadow-sm" referrerPolicy="no-referrer" />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-bold text-xs">{mostActive?.id.substring(0, 2)}</div>
+              <div className="w-8 h-8 rounded-full bg-indigo-200 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 flex items-center justify-center font-bold text-xs">{mostActive?.id.substring(0, 2)}</div>
             )}
             <div>
-              <p className="font-bold text-slate-900">{mostActive?.name}</p>
-              <p className="text-sm text-slate-600">{formatCurrency(mostActive?.price || 0, mostActive?.assetCurrency || profile?.currency || 'USD')}</p>
+              <p className="font-bold text-slate-900 dark:text-slate-100">{mostActive?.name}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">{formatCurrency(mostActive?.price || 0, mostActive?.assetCurrency || profile?.currency || 'USD')}</p>
             </div>
           </div>
         </Card>
@@ -399,8 +399,8 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
               className={cn(
                 "whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-sm",
                 activeFilter === filter.id 
-                  ? filter.id === 'gse' ? "bg-emerald-500 text-white shadow-emerald-200" : "bg-slate-900 text-white shadow-slate-200"
-                  : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ? filter.id === 'gse' ? "bg-brand-primary text-white shadow-brand-primary-light" : "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-slate-200 dark:shadow-slate-800"
+                  : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-200"
               )}
             >
               {filter.label}
@@ -412,7 +412,7 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="h-10 px-3 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="h-10 px-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
           >
             <option value="name">Sort by Name</option>
             <option value="price">Sort by Price</option>
@@ -421,12 +421,12 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
             <option value="sector">Sort by Sector</option>
           </select>
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <Input 
               placeholder="Search assets..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 w-full sm:w-64"
+              className="pl-9 w-full sm:w-64 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
           </div>
         </div>
@@ -448,8 +448,8 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
                 className={cn(
                   "whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium transition-colors border shadow-sm",
                   gseSectorFilter === sector 
-                    ? "bg-emerald-500 text-white border-emerald-600 shadow-emerald-200" 
-                    : "bg-white text-slate-600 border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200"
+                    ? "bg-brand-primary text-white border-brand-primary-dark shadow-brand-primary-light" 
+                    : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-brand-primary-light/20 dark:hover:bg-brand-primary/20 hover:text-brand-primary dark:hover:text-brand-primary-light hover:border-brand-primary-light/50 dark:hover:border-brand-primary/50"
                 )}
               >
                 {sector === 'all' ? 'All Sectors' : sector}
@@ -469,21 +469,21 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
             const getCardGradient = (sector: string, market: string) => {
               if (market === 'GSE') {
                 switch(sector) {
-                  case 'Banking': return 'from-emerald-100 to-teal-200/60 border-emerald-300 shadow-emerald-100/50';
-                  case 'Telecommunications': return 'from-amber-100 to-orange-200/60 border-amber-300 shadow-amber-100/50';
-                  case 'Consumer Goods': return 'from-purple-100 to-fuchsia-200/60 border-purple-300 shadow-purple-100/50';
-                  case 'Energy': return 'from-rose-100 to-red-200/60 border-rose-300 shadow-rose-100/50';
-                  default: return 'from-blue-100 to-indigo-200/60 border-blue-300 shadow-blue-100/50';
+                  case 'Banking': return 'from-brand-primary-light to-brand-primary-light/60 border-brand-primary-light shadow-brand-primary-light/50 dark:from-brand-primary-dark/40 dark:to-brand-primary-dark/20 dark:border-brand-primary-dark/50';
+                  case 'Telecommunications': return 'from-amber-100 to-orange-200/60 border-amber-300 shadow-amber-100/50 dark:from-amber-900/40 dark:to-orange-900/20 dark:border-amber-700/50';
+                  case 'Consumer Goods': return 'from-purple-100 to-fuchsia-200/60 border-purple-300 shadow-purple-100/50 dark:from-purple-900/40 dark:to-fuchsia-900/20 dark:border-purple-700/50';
+                  case 'Energy': return 'from-rose-100 to-red-200/60 border-rose-300 shadow-rose-100/50 dark:from-rose-900/40 dark:to-red-900/20 dark:border-rose-700/50';
+                  default: return 'from-blue-100 to-indigo-200/60 border-blue-300 shadow-blue-100/50 dark:from-blue-900/40 dark:to-indigo-900/20 dark:border-blue-700/50';
                 }
               }
               switch(sector) {
-                case 'Banking': return 'from-emerald-50 to-teal-100/50 border-emerald-100';
-                case 'Telecommunications': return 'from-amber-50 to-orange-100/50 border-amber-100';
-                case 'Consumer Goods': return 'from-purple-50 to-fuchsia-100/50 border-purple-100';
-                case 'Energy': return 'from-rose-50 to-red-100/50 border-rose-100';
-                case 'Technology': return 'from-blue-50 to-indigo-100/50 border-blue-100';
-                case 'Cryptocurrency': return 'from-slate-50 to-gray-100/50 border-slate-200';
-                default: return 'from-slate-50 to-slate-100/50 border-slate-100';
+                case 'Banking': return 'from-brand-primary-light to-brand-primary-light/50 border-brand-primary-light dark:from-brand-primary-dark/30 dark:to-brand-primary-dark/10 dark:border-brand-primary-dark/30';
+                case 'Telecommunications': return 'from-amber-50 to-orange-100/50 border-amber-100 dark:from-amber-900/30 dark:to-orange-900/10 dark:border-amber-800/30';
+                case 'Consumer Goods': return 'from-purple-50 to-fuchsia-100/50 border-purple-100 dark:from-purple-900/30 dark:to-fuchsia-900/10 dark:border-purple-800/30';
+                case 'Energy': return 'from-rose-50 to-red-100/50 border-rose-100 dark:from-rose-900/30 dark:to-red-900/10 dark:border-rose-800/30';
+                case 'Technology': return 'from-blue-50 to-indigo-100/50 border-blue-100 dark:from-blue-900/30 dark:to-indigo-900/10 dark:border-blue-800/30';
+                case 'Cryptocurrency': return 'from-slate-50 to-gray-100/50 border-slate-200 dark:from-slate-800/50 dark:to-slate-900/50 dark:border-slate-700';
+                default: return 'from-slate-50 to-slate-100/50 border-slate-100 dark:from-slate-800/50 dark:to-slate-900/50 dark:border-slate-700';
               }
             };
 
@@ -507,28 +507,28 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
                     <div>
                       <div className="flex items-center gap-2">
                         {asset.logo ? (
-                          <img src={asset.logo} alt={asset.name} className="w-6 h-6 rounded-full object-cover bg-white p-0.5 shadow-sm" referrerPolicy="no-referrer" />
+                          <img src={asset.logo} alt={asset.name} className="w-6 h-6 rounded-full object-cover bg-white dark:bg-slate-800 p-0.5 shadow-sm" referrerPolicy="no-referrer" />
                         ) : (
-                          <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-bold text-[10px]">{asset.id.substring(0, 2)}</div>
+                          <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300 font-bold text-[10px]">{asset.id.substring(0, 2)}</div>
                         )}
-                        <h4 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{asset.id}</h4>
+                        <h4 className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-brand-primary dark:group-hover:text-brand-primary-light transition-colors">{asset.id}</h4>
                         <button 
                           onClick={(e) => toggleWatchlist(e, asset.id)}
-                          className="text-slate-300 hover:text-amber-400 transition-colors"
+                          className="text-slate-300 dark:text-slate-600 hover:text-amber-400 dark:hover:text-amber-400 transition-colors"
                         >
                           <Star className={cn("w-4 h-4", watchlist.includes(asset.id) && "fill-amber-400 text-amber-400")} />
                         </button>
                       </div>
-                      <p className="text-xs text-slate-600 truncate max-w-[120px] font-medium mt-1">{asset.name}</p>
-                      {asset.sector && <p className="text-[10px] text-slate-500 mt-0.5">{asset.sector}</p>}
+                      <p className="text-xs text-slate-600 dark:text-slate-400 truncate max-w-[120px] font-medium mt-1">{asset.name}</p>
+                      {asset.sector && <p className="text-[10px] text-slate-500 dark:text-slate-500 mt-0.5">{asset.sector}</p>}
                     </div>
                     <div className={cn(
                       "px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider shadow-sm",
-                      asset.market === 'GSE' ? "bg-emerald-500 text-white shadow-emerald-200" :
-                      asset.type === 'stock' ? "bg-blue-100 text-blue-700" :
-                      asset.type === 'crypto' ? "bg-amber-100 text-amber-700" :
-                      asset.type === 'bond' ? "bg-slate-200 text-slate-700" :
-                      "bg-purple-100 text-purple-700"
+                      asset.market === 'GSE' ? "bg-brand-primary text-white shadow-brand-primary-light" :
+                      asset.type === 'stock' ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300" :
+                      asset.type === 'crypto' ? "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300" :
+                      asset.type === 'bond' ? "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300" :
+                      "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300"
                     )}>
                       {asset.market === 'GSE' ? 'GSE' : asset.type}
                     </div>
@@ -541,7 +541,7 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
                         initial={{ backgroundColor: 'rgba(16, 185, 129, 0.2)' }}
                         animate={{ backgroundColor: 'rgba(16, 185, 129, 0)' }}
                         transition={{ duration: 1 }}
-                        className="text-xl font-bold text-slate-900 rounded px-1 -mx-1"
+                        className="text-xl font-bold text-slate-900 dark:text-slate-100 rounded px-1 -mx-1"
                       >
                         {formatCurrency(asset.price, asset.assetCurrency || profile?.currency || 'USD')}
                       </motion.div>
@@ -551,7 +551,7 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
                         animate={{ opacity: 1 }}
                         className={cn(
                           "flex items-center gap-1 text-sm font-bold mt-1",
-                          isPositive ? "text-emerald-600" : "text-rose-600"
+                          isPositive ? "text-brand-primary dark:text-brand-primary-light" : "text-rose-600 dark:text-rose-400"
                         )}
                       >
                         {isPositive ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
@@ -591,9 +591,9 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
 
       {filteredData.length === 0 && (
         <div className="text-center py-12">
-          <Search className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h4 className="text-slate-700 font-medium">No assets found</h4>
-          <p className="text-slate-400 text-sm mt-1">Try adjusting your search or filters.</p>
+          <Search className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+          <h4 className="text-slate-700 dark:text-slate-300 font-medium">No assets found</h4>
+          <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">Try adjusting your search or filters.</p>
         </div>
       )}
 
@@ -606,43 +606,43 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedAsset(null)}
-              className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50"
+              className="fixed inset-0 bg-slate-900/20 dark:bg-slate-900/60 backdrop-blur-sm z-50"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl bg-white rounded-2xl shadow-2xl z-50 overflow-hidden"
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl z-50 overflow-hidden border border-slate-200 dark:border-slate-800"
             >
               <div className={cn(
                 "p-6 border-b flex justify-between items-start",
                 selectedAsset.market === 'GSE' 
-                  ? "bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 border-emerald-100" 
-                  : "bg-white border-slate-100"
+                  ? "bg-gradient-to-r from-brand-primary-light via-brand-primary-light/50 to-brand-primary-light/20 border-brand-primary-light dark:from-brand-primary-dark/40 dark:via-brand-primary-dark/20 dark:to-transparent dark:border-brand-primary-dark/50" 
+                  : "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800"
               )}>
                 <div>
                   <div className="flex items-center gap-3 mb-1">
                     {selectedAsset.logo ? (
-                      <img src={selectedAsset.logo} alt={selectedAsset.name} className="w-10 h-10 rounded-full object-cover bg-white p-0.5 shadow-sm" referrerPolicy="no-referrer" />
+                      <img src={selectedAsset.logo} alt={selectedAsset.name} className="w-10 h-10 rounded-full object-cover bg-white dark:bg-slate-800 p-0.5 shadow-sm" referrerPolicy="no-referrer" />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-bold text-sm">{selectedAsset.id.substring(0, 2)}</div>
+                      <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300 font-bold text-sm">{selectedAsset.id.substring(0, 2)}</div>
                     )}
-                    <h2 className="text-2xl font-bold text-slate-900">{selectedAsset.id}</h2>
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{selectedAsset.id}</h2>
                     <span className={cn(
                       "px-2 py-1 text-xs font-bold uppercase rounded shadow-sm",
-                      selectedAsset.market === 'GSE' ? "bg-emerald-500 text-white shadow-emerald-200" : "bg-slate-100 text-slate-600"
+                      selectedAsset.market === 'GSE' ? "bg-brand-primary text-white shadow-brand-primary-light" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
                     )}>
                       {selectedAsset.market === 'GSE' ? 'GSE' : selectedAsset.type}
                     </span>
                     <button 
                       onClick={(e) => toggleWatchlist(e, selectedAsset.id)}
-                      className="text-slate-300 hover:text-amber-400 transition-colors ml-2"
+                      className="text-slate-300 dark:text-slate-600 hover:text-amber-400 dark:hover:text-amber-400 transition-colors ml-2"
                     >
                       <Star className={cn("w-6 h-6", watchlist.includes(selectedAsset.id) && "fill-amber-400 text-amber-400")} />
                     </button>
                   </div>
-                  <p className="text-slate-700 font-medium text-lg">{selectedAsset.name}</p>
-                  {selectedAsset.sector && <p className="text-sm text-slate-500 mt-1">{selectedAsset.sector}</p>}
+                  <p className="text-slate-700 dark:text-slate-300 font-medium text-lg">{selectedAsset.name}</p>
+                  {selectedAsset.sector && <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{selectedAsset.sector}</p>}
                 </div>
                 <div className="text-right flex flex-col items-end">
                   <motion.div 
@@ -650,7 +650,7 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
                     initial={{ backgroundColor: 'rgba(16, 185, 129, 0.2)' }}
                     animate={{ backgroundColor: 'rgba(16, 185, 129, 0)' }}
                     transition={{ duration: 1 }}
-                    className="text-3xl font-bold text-slate-900 rounded px-2 py-1 -mx-2 -my-1"
+                    className="text-3xl font-bold text-slate-900 dark:text-slate-100 rounded px-2 py-1 -mx-2 -my-1"
                   >
                     {formatCurrency(selectedAsset.price, selectedAsset.assetCurrency || profile?.currency || 'USD')}
                   </motion.div>
@@ -660,7 +660,7 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
                     animate={{ opacity: 1 }}
                     className={cn(
                       "flex items-center justify-end gap-1 text-sm font-bold mt-2",
-                      selectedAsset.change >= 0 ? "text-emerald-600" : "text-rose-600"
+                      selectedAsset.change >= 0 ? "text-brand-primary dark:text-brand-primary-light" : "text-rose-600 dark:text-rose-400"
                     )}
                   >
                     {selectedAsset.change >= 0 ? '+' : ''}{formatCurrency(selectedAsset.change, selectedAsset.assetCurrency || profile?.currency || 'USD')} 
@@ -669,7 +669,7 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
                   <Button 
                     size="sm" 
                     variant="outline" 
-                    className="mt-4 text-xs flex items-center gap-1 bg-white shadow-sm"
+                    className="mt-4 text-xs flex items-center gap-1 bg-white dark:bg-slate-800 shadow-sm border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                     onClick={() => {
                       setAlertTargetPrice(selectedAsset.price.toString());
                       setShowSetAlertModal(true);
@@ -681,13 +681,13 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
               </div>
               
               {selectedAsset.description && (
-                <div className="px-6 pt-5 pb-4 bg-slate-50/50 border-b border-slate-100">
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">About {selectedAsset.name}</h4>
-                  <p className="text-sm text-slate-700 leading-relaxed">{selectedAsset.description}</p>
+                <div className="px-6 pt-5 pb-4 bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+                  <h4 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">About {selectedAsset.name}</h4>
+                  <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{selectedAsset.description}</p>
                 </div>
               )}
               
-              <div className="p-6 bg-slate-50">
+              <div className="p-6 bg-slate-50 dark:bg-slate-900/50">
                 <div className="flex items-center justify-end gap-2 mb-4">
                   {['1D', '7D', '1M', '1Y'].map(range => (
                     <button
@@ -696,8 +696,8 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
                       className={cn(
                         "px-3 py-1 text-xs font-bold rounded-md transition-colors",
                         timeRange === range 
-                          ? "bg-indigo-100 text-indigo-700" 
-                          : "text-slate-500 hover:bg-slate-200"
+                          ? "bg-brand-primary/10 text-brand-primary dark:bg-brand-primary/20 dark:text-brand-primary-light" 
+                          : "text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800"
                       )}
                     >
                       {range}
@@ -735,12 +735,12 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
                 </div>
               </div>
               
-              <div className="p-6 border-t border-slate-100 flex justify-between items-center bg-white">
-                <p className="text-sm text-slate-500 flex items-center gap-2">
+              <div className="p-6 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900">
+                <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2">
                   <Info className="w-4 h-4" />
                   Ask the SUSU Assistant about {selectedAsset.id} for more insights.
                 </p>
-                <Button onClick={() => setSelectedAsset(null)} variant="outline">
+                <Button onClick={() => setSelectedAsset(null)} variant="outline" className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
                   Close
                 </Button>
               </div>
@@ -758,43 +758,43 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowSetAlertModal(false)}
-              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60]"
+              className="fixed inset-0 bg-slate-900/40 dark:bg-slate-900/80 backdrop-blur-sm z-[60]"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white rounded-2xl shadow-2xl z-[60] overflow-hidden"
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl shadow-2xl z-[60] overflow-hidden border border-slate-200 dark:border-slate-800"
             >
               <div className="p-6">
-                <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
-                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                    <Bell className="w-5 h-5 text-indigo-500" /> Set Price Alert
+                <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    <Bell className="w-5 h-5 text-brand-primary dark:text-brand-primary-light" /> Set Price Alert
                   </h3>
-                  <button onClick={() => setShowSetAlertModal(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-1.5 rounded-full hover:bg-slate-100 transition-colors">
+                  <button onClick={() => setShowSetAlertModal(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
                 
-                <div className="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <p className="text-xs text-slate-500 uppercase tracking-wider font-bold mb-1">Asset</p>
-                  <p className="font-bold text-slate-900 text-lg">{selectedAsset.name} ({selectedAsset.id})</p>
-                  <p className="text-sm text-slate-600 mt-1 flex items-center gap-1">
-                    Current Price: <span className="font-bold text-slate-900">{formatCurrency(selectedAsset.price, selectedAsset.assetCurrency || 'USD')}</span>
+                <div className="mb-6 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold mb-1">Asset</p>
+                  <p className="font-bold text-slate-900 dark:text-slate-100 text-lg">{selectedAsset.name} ({selectedAsset.id})</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 flex items-center gap-1">
+                    Current Price: <span className="font-bold text-slate-900 dark:text-slate-100">{formatCurrency(selectedAsset.price, selectedAsset.assetCurrency || 'USD')}</span>
                   </p>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Alert Condition</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Alert Condition</label>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         onClick={() => setAlertCondition('above')}
                         className={cn(
                           "px-4 py-2 text-sm font-medium rounded-xl border transition-colors",
                           alertCondition === 'above' 
-                            ? "bg-emerald-50 border-emerald-200 text-emerald-700" 
-                            : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                            ? "bg-brand-primary/10 border-brand-primary/30 text-brand-primary dark:bg-brand-primary-dark/30 dark:border-brand-primary-dark/50 dark:text-brand-primary-light" 
+                            : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
                         )}
                       >
                         Goes Above
@@ -804,8 +804,8 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
                         className={cn(
                           "px-4 py-2 text-sm font-medium rounded-xl border transition-colors",
                           alertCondition === 'below' 
-                            ? "bg-rose-50 border-rose-200 text-rose-700" 
-                            : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                            ? "bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-900/30 dark:border-rose-800/50 dark:text-rose-400" 
+                            : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
                         )}
                       >
                         Drops Below
@@ -814,10 +814,10 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Target Price</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Target Price</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <DollarSign className="w-4 h-4 text-slate-400" />
+                        <DollarSign className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                       </div>
                       <Input
                         type="number"
@@ -825,12 +825,12 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
                         onChange={(e) => setAlertTargetPrice(e.target.value)}
                         placeholder="Enter target price"
                         step="0.01"
-                        className="pl-9"
+                        className="pl-9 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
                       />
                     </div>
                   </div>
 
-                  <Button className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200" onClick={handleSaveAlert}>
+                  <Button className="w-full mt-6 bg-brand-primary hover:bg-brand-primary-dark text-white shadow-md shadow-brand-primary/20" onClick={handleSaveAlert}>
                     Save Alert
                   </Button>
                 </div>
@@ -849,19 +849,19 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowAlertsModal(false)}
-              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60]"
+              className="fixed inset-0 bg-slate-900/40 dark:bg-slate-900/80 backdrop-blur-sm z-[60]"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-2xl z-[60] overflow-hidden flex flex-col max-h-[80vh]"
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl z-[60] overflow-hidden flex flex-col max-h-[80vh] border border-slate-200 dark:border-slate-800"
             >
-              <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-indigo-50 to-blue-50">
-                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                  <BellRing className="w-5 h-5 text-indigo-500" /> Your Price Alerts
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-gradient-to-r from-brand-primary/5 to-brand-secondary/5 dark:from-brand-primary-dark/20 dark:to-brand-secondary-dark/20">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <BellRing className="w-5 h-5 text-brand-primary dark:text-brand-primary-light" /> Your Price Alerts
                 </h3>
-                <button onClick={() => setShowAlertsModal(false)} className="text-slate-400 hover:text-slate-600 bg-white p-1.5 rounded-full shadow-sm">
+                <button onClick={() => setShowAlertsModal(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-sm border border-slate-100 dark:border-slate-700">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -869,40 +869,40 @@ export function MarketInsights({ profile }: MarketInsightsProps) {
               <div className="p-6 overflow-y-auto flex-1">
                 {alerts.length === 0 ? (
                   <div className="text-center py-8">
-                    <Bell className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-                    <h4 className="text-slate-600 font-medium">No alerts set</h4>
-                    <p className="text-slate-400 text-sm mt-1">Set price alerts to get notified when assets reach your target price.</p>
+                    <Bell className="w-12 h-12 text-slate-200 dark:text-slate-700 mx-auto mb-3" />
+                    <h4 className="text-slate-600 dark:text-slate-400 font-medium">No alerts set</h4>
+                    <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">Set price alerts to get notified when assets reach your target price.</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {alerts.map(alert => (
                       <div key={alert.id} className={cn(
                         "p-4 rounded-xl border flex items-center justify-between",
-                        alert.active ? "bg-white border-slate-200" : "bg-slate-50 border-slate-200 opacity-75"
+                        alert.active ? "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700" : "bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 opacity-75"
                       )}>
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-slate-900">{alert.assetName}</span>
-                            <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{alert.assetId}</span>
+                            <span className="font-bold text-slate-900 dark:text-slate-100">{alert.assetName}</span>
+                            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">{alert.assetId}</span>
                           </div>
                           <div className="flex items-center gap-1 text-sm">
-                            <span className="text-slate-500">Target:</span>
+                            <span className="text-slate-500 dark:text-slate-400">Target:</span>
                             <span className={cn(
                               "font-bold",
-                              alert.condition === 'above' ? "text-emerald-600" : "text-rose-600"
+                              alert.condition === 'above' ? "text-brand-primary dark:text-brand-primary-light" : "text-rose-600 dark:text-rose-400"
                             )}>
                               {alert.condition === 'above' ? '≥' : '≤'} {alert.targetPrice}
                             </span>
                           </div>
                           {!alert.active && alert.triggeredAt && (
-                            <div className="text-xs text-indigo-600 font-medium mt-1 flex items-center gap-1">
+                            <div className="text-xs text-brand-primary dark:text-brand-primary-light font-medium mt-1 flex items-center gap-1">
                               <CheckCircle2 className="w-3 h-3" /> Triggered
                             </div>
                           )}
                         </div>
                         <button 
                           onClick={() => deleteAlert(alert.id)}
-                          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                          className="p-2 text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

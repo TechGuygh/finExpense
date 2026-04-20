@@ -20,6 +20,64 @@ export function AIInvestmentAdvisor({ profile }: AIInvestmentAdvisorProps) {
   const [plan, setPlan] = useState<AIInvestmentPlan | null>(null);
   const [riskTolerance, setRiskTolerance] = useState('medium');
   const [investmentHorizon, setInvestmentHorizon] = useState('5-10 years');
+  const [currentIncome, setCurrentIncome] = useState(0);
+  const [forecastedIncome, setForecastedIncome] = useState(0);
+  const [incomeDataLoading, setIncomeDataLoading] = useState(true);
+
+  useEffect(() => {
+    if (!auth.currentUser) return;
+
+    const fetchIncomeData = async () => {
+      setIncomeDataLoading(true);
+      try {
+        const [txSnap, goalsSnap] = await Promise.all([
+          getDocs(query(collection(db, 'transactions'), where('userId', '==', auth.currentUser.uid), where('type', '==', 'income'))),
+          getDocs(query(collection(db, 'savingsGoals'), where('userId', '==', auth.currentUser.uid)))
+        ]);
+
+        const transactions = txSnap.docs.map(d => d.data() as Transaction);
+        const savingsGoals = goalsSnap.docs.map(d => d.data() as SavingsGoal);
+
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
+        let currentMonthIncome = 0;
+        let totalHistoricalIncome = 0;
+        let oldestDate = now;
+
+        transactions.forEach(tx => {
+          const txDate = new Date(tx.date);
+          if (txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear) {
+            currentMonthIncome += tx.amount;
+          }
+          totalHistoricalIncome += tx.amount;
+          if (txDate < oldestDate) {
+            oldestDate = txDate;
+          }
+        });
+
+        const monthsDiff = (now.getFullYear() - oldestDate.getFullYear()) * 12 + (now.getMonth() - oldestDate.getMonth()) + 1;
+        const avgMonthlyIncome = monthsDiff > 0 ? totalHistoricalIncome / monthsDiff : 0;
+
+        const totalGoals = savingsGoals.reduce((sum, goal) => sum + goal.targetAmount, 0);
+        const totalSaved = savingsGoals.reduce((sum, goal) => sum + goal.currentAmount, 0);
+        const remainingGoals = Math.max(0, totalGoals - totalSaved);
+
+        // Forecasted income: Average historical income + a factor of remaining goals
+        const forecast = avgMonthlyIncome + (remainingGoals * 0.05); // Assume 5% of remaining goals needs to be added to monthly income
+
+        setCurrentIncome(currentMonthIncome);
+        setForecastedIncome(forecast > 0 ? forecast : currentMonthIncome * 1.05);
+      } catch (error) {
+        console.error("Failed to fetch income data:", error);
+      } finally {
+        setIncomeDataLoading(false);
+      }
+    };
+
+    fetchIncomeData();
+  }, []);
 
   const generatePlan = async () => {
     if (!auth.currentUser) return;
@@ -53,6 +111,43 @@ export function AIInvestmentAdvisor({ profile }: AIInvestmentAdvisorProps) {
 
   return (
     <div className="space-y-8">
+      {/* Income Forecast Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="bg-white border-slate-200 p-6 flex flex-col justify-center">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-full bg-brand-primary-light text-brand-primary flex items-center justify-center">
+              <Activity className="w-5 h-5" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900">Current Income</h3>
+          </div>
+          {incomeDataLoading ? (
+            <div className="h-8 w-32 bg-slate-100 animate-pulse rounded mt-2" />
+          ) : (
+            <p className="text-3xl font-bold text-brand-primary mt-2">
+              {formatCurrency(currentIncome, profile?.currency)}
+            </p>
+          )}
+          <p className="text-sm text-slate-500 mt-1">Total income this month</p>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white border-none p-6 flex flex-col justify-center">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-full bg-white/20 text-white flex items-center justify-center">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+            <h3 className="text-lg font-bold">Forecasted Income</h3>
+          </div>
+          {incomeDataLoading ? (
+            <div className="h-8 w-32 bg-white/20 animate-pulse rounded mt-2" />
+          ) : (
+            <p className="text-3xl font-bold mt-2">
+              {formatCurrency(forecastedIncome, profile?.currency)}
+            </p>
+          )}
+          <p className="text-sm text-indigo-100 mt-1">Projected monthly income to meet savings goals</p>
+        </Card>
+      </div>
+
       <Card className="bg-white border-slate-200">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
           <div>
@@ -169,7 +264,7 @@ export function AIInvestmentAdvisor({ profile }: AIInvestmentAdvisorProps) {
                       <div className="sm:w-3/4">
                         <p className="text-sm text-slate-600 mb-2">{rec.reasoning}</p>
                         <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
-                          rec.riskLevel === 'low' ? 'bg-emerald-100 text-emerald-700' :
+                          rec.riskLevel === 'low' ? 'bg-brand-primary-light text-brand-primary-dark' :
                           rec.riskLevel === 'medium' ? 'bg-amber-100 text-amber-700' :
                           'bg-rose-100 text-rose-700'
                         }`}>
@@ -218,9 +313,9 @@ export function AIInvestmentAdvisor({ profile }: AIInvestmentAdvisorProps) {
                   </ul>
                 </Card>
 
-                <Card className="bg-emerald-50 border-emerald-100">
-                  <h3 className="text-sm font-bold text-emerald-900 mb-1">Behavioral Nudge</h3>
-                  <p className="text-sm text-emerald-800">{plan.behavioralNudge}</p>
+                <Card className="bg-brand-primary-light border-brand-primary-light">
+                  <h3 className="text-sm font-bold text-brand-primary-dark mb-1">Behavioral Nudge</h3>
+                  <p className="text-sm text-brand-primary-dark">{plan.behavioralNudge}</p>
                 </Card>
               </div>
             </div>
